@@ -1,0 +1,22 @@
+# File Python tạm
+__pycache__/
+*.pyc
+.venv/
+
+# Dữ liệu gốc: tải lại bằng etl/download_telco.py, đối chiếu bằng SHA-256 trong README
+ml/data/raw/*.csv
+
+# Mô hình đã huấn luyện (P4 sẽ có), chưa đưa lên repo
+ml/models/*.joblib
+
+# File sao lưu: backup database gửi cô (.bak) và file sao lưu của PowerDesigner
+*.bak
+
+# ASP.NET (P3 sẽ có)
+bin/
+obj/
+.vs/
+
+# Bí mật: chuỗi kết nối, mật khẩu, không bao giờ commit
+.env
+appsettings.Development.json
