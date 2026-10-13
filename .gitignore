@@ -20,3 +20,6 @@ obj/
 # Bí mật: chuỗi kết nối, mật khẩu, không bao giờ commit
 .env
 appsettings.Development.json
+
+delivery/
+*.bacpac
