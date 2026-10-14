@@ -1,7 +1,17 @@
+﻿/* schema.sql - tao tu PDM_CRM_Churn_DeTai18 (PowerDesigner, SQL Server 2017)
+   Doan dau (CREATE DATABASE, USE) duoc them tay; PowerDesigner sinh lai se mat doan nay.
+   Chay SAU file nay: constraints_bo_sung.sql (cac CHECK nhieu cot). */
+IF DB_ID(N'CRM_Churn') IS NULL
+    CREATE DATABASE CRM_Churn;
+GO
+USE CRM_Churn;
+GO
+
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2017                    */
-/* Created on:     10/10/2026 10:23:18 CH                       */
+/* Created on:     14/10/2026 1:12:14 CH                        */
 /*==============================================================*/
+
 
 /*==============================================================*/
 /* Table: AuditLog                                              */
@@ -37,7 +47,8 @@ create table ChurnPredictions (
    ModelVersionID       int                  not null,
    CustomerID           varchar(20)          null,
    PredictionTime       datetime             not null default getdate(),
-   Probability          decimal(9,8)         not null,
+   Probability          decimal(9,8)         not null 
+      constraint CKC_PROBABILITY_CHURNPRE check (Probability between 0 and 1),
    RiskLevel            varchar(10)          not null,
    InputJson            nvarchar(max)        null,
    TopFactorsJson       nvarchar(max)        null,
@@ -66,6 +77,33 @@ create nonclustered index SINH_RA_FK on ChurnPredictions (ModelVersionID ASC)
 go
 
 /*==============================================================*/
+/* Table: CustomerContracts                                     */
+/*==============================================================*/
+create table CustomerContracts (
+   ContractRecordID     bigint               identity,
+   CustomerID           varchar(20)          not null,
+   UpdatedByStaffID     int                  null,
+   EffectiveFrom        datetime             not null,
+   EffectiveTo          datetime             null,
+   PhoneService         varchar(30)          not null,
+   MultipleLines        varchar(30)          not null,
+   InternetService      varchar(30)          not null,
+   OnlineSecurity       varchar(30)          not null,
+   OnlineBackup         varchar(30)          not null,
+   DeviceProtection     varchar(30)          not null,
+   TechSupport          varchar(30)          not null,
+   StreamingTV          varchar(30)          not null,
+   StreamingMovies      varchar(30)          not null,
+   Contract             varchar(30)          not null,
+   PaperlessBilling     varchar(10)          not null,
+   PaymentMethod        varchar(50)          not null,
+   MonthlyCharges       decimal(8,2)         not null,
+   constraint PK_CUSTOMERCONTRACTS primary key (ContractRecordID),
+   constraint AK_DANG_HIEU_LUC_CUSTOMER unique (CustomerID, EffectiveTo)
+)
+go
+
+/*==============================================================*/
 /* Table: CustomerSnapshots                                     */
 /*==============================================================*/
 create table CustomerSnapshots (
@@ -88,7 +126,8 @@ create table CustomerSnapshots (
    MonthlyCharges       decimal(8,2)         not null,
    TotalCharges         decimal(10,2)        null,
    ChurnLabel           varchar(10)          null,
-   constraint PK_CUSTOMERSNAPSHOTS primary key (SnapshotID)
+   constraint PK_CUSTOMERSNAPSHOTS primary key (SnapshotID),
+   constraint AK_SNAPSHOT_THEO_NGAY_CUSTOMER unique (CustomerID, SnapshotDate)
 )
 go
 
@@ -163,7 +202,8 @@ create table ModelVersions (
    ModelName            varchar(50)          not null,
    Version              varchar(20)          not null,
    TrainDate            datetime             not null,
-   Threshold            decimal(5,4)         not null,
+   Threshold            decimal(5,4)         not null 
+      constraint CKC_THRESHOLD_MODELVER check (Threshold between 0 and 1),
    MetricsJson          nvarchar(max)        null,
    Seed                 int                  null,
    ConfigJson           nvarchar(max)        null,
@@ -241,13 +281,17 @@ create table Tickets (
    CustomerID           varchar(20)          not null,
    CreatedAt            datetime             not null,
    ClosedAt             datetime             null,
-   Category             varchar(50)          not null,
-   Priority             varchar(10)          not null,
-   Status               varchar(20)          not null,
+   Category             varchar(50)          not null 
+      constraint CKC_CATEGORY_TICKETS check (Category in ('Billing','Technical','Service')),
+   Priority             varchar(10)          not null 
+      constraint CKC_PRIORITY_TICKETS check (Priority in ('Low','Medium','High')),
+   Status               varchar(20)          not null 
+      constraint CKC_STATUS_TICKETS check (Status in ('Open','InProgress','Closed')),
    Resolution           nvarchar(1000)       null,
    SatisfactionScore    smallint             null 
       constraint CKC_SATISFACTIONSCORE_TICKETS check (SatisfactionScore is null or (SatisfactionScore between 1 and 5)),
    IsSimulated          bit                  not null default 0,
+   ReopenReason         nvarchar(500)        null,
    constraint PK_TICKETS primary key (TicketID)
 )
 go
@@ -284,6 +328,16 @@ go
 
 alter table ChurnPredictions
    add constraint FK_CHURNPRE__UOC_CHAM_CUSTOMER foreign key (CustomerID)
+      references Customers (CustomerID)
+go
+
+alter table CustomerContracts
+   add constraint FK_CUSTOMER_CAP_NHAT__STAFF foreign key (UpdatedByStaffID)
+      references Staff (StaffID)
+go
+
+alter table CustomerContracts
+   add constraint FK_CUSTOMER_CO_HOP_DO_CUSTOMER foreign key (CustomerID)
       references Customers (CustomerID)
 go
 
