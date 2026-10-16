@@ -1,14 +1,19 @@
 """
 Nạp dữ liệu IBM Telco (CSV gốc) vào database CRM_Churn.
 
-Script ghi vào 3 bảng, trong MỘT transaction:
+Script ghi vào 4 bảng, trong MỘT transaction:
   1. TelcoRaw          : bản sao NGUYÊN VĂN của CSV (21 cột, kiểu chuỗi)
   2. Customers         : hồ sơ khách (7.043 dòng)
   3. CustomerSnapshots : ảnh chụp dịch vụ và hợp đồng (7.043 dòng, mỗi khách một dòng)
+  4. CustomerContracts : hợp đồng/dịch vụ NGHIỆP VỤ (D-19), lần nạp đầu chép từ snapshot:
+                         mỗi khách một dòng đang hiệu lực (EffectiveTo = NULL),
+                         EffectiveFrom = SnapshotDate. Web sửa hợp đồng ở bảng này,
+                         KHÔNG sửa CustomerSnapshots (R-14).
 
 Quy tắc an toàn:
-  - Từ chối chạy nếu TelcoRaw, Customers hoặc CustomerSnapshots đã có dòng.
-    Script KHÔNG xóa gì. Muốn nạp lại thì xóa database rồi chạy lại 2 file SQL.
+  - Từ chối chạy nếu TelcoRaw, Customers, CustomerSnapshots hoặc CustomerContracts đã có dòng.
+    Script KHÔNG xóa gì. Muốn nạp lại thì xóa database rồi chạy lại các file SQL.
+  - Từ chối chạy nếu chưa chạy constraints_bo_sung.sql (database chưa đủ số CHECK).
   - Dữ liệu lạ (giá trị ngoài danh sách, ID trùng, ...) thì DỪNG trước khi ghi.
   - Nạp xong tự đếm lại; một con số sai là ROLLBACK, database không đổi gì.
 
@@ -70,14 +75,31 @@ CUSTOMER_COLUMNS = [
     "EstimatedJoinDate",
 ]
 
-# Cột của bảng CustomerSnapshots (không có SnapshotID vì là identity tự tăng)
-SNAPSHOT_COLUMNS = [
-    "CustomerID", "SnapshotDate", "Tenure", "PhoneService", "MultipleLines",
-    "InternetService", "OnlineSecurity", "OnlineBackup", "DeviceProtection",
-    "TechSupport", "StreamingTV", "StreamingMovies", "Contract",
-    "PaperlessBilling", "PaymentMethod", "MonthlyCharges", "TotalCharges",
-    "ChurnLabel",
+# 12 cột dịch vụ, hợp đồng, thanh toán: có ở CẢ CustomerSnapshots LẪN CustomerContracts
+SERVICE_COLUMNS = [
+    "PhoneService", "MultipleLines", "InternetService", "OnlineSecurity",
+    "OnlineBackup", "DeviceProtection", "TechSupport", "StreamingTV",
+    "StreamingMovies", "Contract", "PaperlessBilling", "PaymentMethod",
 ]
+
+# Cột của bảng CustomerSnapshots (không có SnapshotID vì là identity tự tăng)
+SNAPSHOT_COLUMNS = (
+    ["CustomerID", "SnapshotDate", "Tenure"]
+    + SERVICE_COLUMNS
+    + ["MonthlyCharges", "TotalCharges", "ChurnLabel"]
+)
+
+# Cột của bảng CustomerContracts.
+# KHÔNG có ContractRecordID (identity), EffectiveTo (để NULL = đang hiệu lực)
+# và UpdatedByStaffID (để NULL vì dòng này do script nạp, không phải nhân viên sửa).
+CONTRACT_COLUMNS = (
+    ["CustomerID", "EffectiveFrom"]
+    + SERVICE_COLUMNS
+    + ["MonthlyCharges"]
+)
+
+# Các bảng phải có và phải đang trống trước khi nạp
+TABLES_MUST_BE_EMPTY = ["TelcoRaw", "Customers", "CustomerSnapshots", "CustomerContracts"]
 
 
 def load_config():
@@ -158,9 +180,11 @@ def validate_data(raw_data, stripped_data, expected_rows):
 
 
 def build_rows(stripped_data, snapshot_date):
-    """Biến dữ liệu đã làm sạch thành 2 danh sách dòng: Customers và CustomerSnapshots."""
+    """Biến dữ liệu đã làm sạch thành 3 danh sách dòng:
+    Customers, CustomerSnapshots và CustomerContracts."""
     customer_rows = []
     snapshot_rows = []
+    contract_rows = []
 
     for _, record in stripped_data.iterrows():
         customer_id = record["customerID"]
@@ -185,28 +209,26 @@ def build_rows(stripped_data, snapshot_date):
         else:
             total_charges = Decimal(record["TotalCharges"])
 
-        snapshot_rows.append((
-            customer_id,
-            snapshot_date,
-            tenure_months,
-            record["PhoneService"],
-            record["MultipleLines"],
-            record["InternetService"],
-            record["OnlineSecurity"],
-            record["OnlineBackup"],
-            record["DeviceProtection"],
-            record["TechSupport"],
-            record["StreamingTV"],
-            record["StreamingMovies"],
-            record["Contract"],
-            record["PaperlessBilling"],
-            record["PaymentMethod"],
-            Decimal(record["MonthlyCharges"]),
-            total_charges,
-            record["Churn"],
-        ))
+        monthly_charges = Decimal(record["MonthlyCharges"])
 
-    return customer_rows, snapshot_rows
+        # 12 giá trị dịch vụ/hợp đồng/thanh toán, theo đúng thứ tự SERVICE_COLUMNS
+        service_values = [record[column_name] for column_name in SERVICE_COLUMNS]
+
+        snapshot_rows.append(
+            (customer_id, snapshot_date, tenure_months)
+            + tuple(service_values)
+            + (monthly_charges, total_charges, record["Churn"])
+        )
+
+        # CustomerContracts (D-19): chép từ snapshot, một dòng đang hiệu lực mỗi khách.
+        # EffectiveFrom = SnapshotDate (không dùng EstimatedJoinDate, đề xuất chờ Phúc xác nhận ở G1b).
+        contract_rows.append(
+            (customer_id, snapshot_date)
+            + tuple(service_values)
+            + (monthly_charges,)
+        )
+
+    return customer_rows, snapshot_rows, contract_rows
 
 
 def build_insert_sql(table_name, column_names):
@@ -218,17 +240,34 @@ def build_insert_sql(table_name, column_names):
     )
 
 
-def insert_all(connection, raw_data, customer_rows, snapshot_rows):
-    """Ghi 3 bảng. Chưa commit; việc commit hay rollback do hàm main quyết."""
+def build_contract_mismatch_sql():
+    """Câu SELECT đếm số khách mà dòng CustomerContracts KHÁC snapshot.
+
+    Dùng chung cho load_telco.py và build_delivery.py (file 03). Kết quả phải là 0.
+    So sánh bằng <> với từng cột; không cột nào được NULL ở các cột này nên không lọt NULL.
+    """
+    conditions = ["k.EffectiveFrom <> s.SnapshotDate", "k.MonthlyCharges <> s.MonthlyCharges"]
+    for column_name in SERVICE_COLUMNS:
+        conditions.append("k." + column_name + " <> s." + column_name)
+    return (
+        "SELECT COUNT(*) FROM CustomerContracts k "
+        "JOIN CustomerSnapshots s ON k.CustomerID = s.CustomerID "
+        "WHERE " + " OR ".join(conditions)
+    )
+
+
+def insert_all(connection, raw_data, customer_rows, snapshot_rows, contract_rows):
+    """Ghi 4 bảng. Chưa commit; việc commit hay rollback do hàm main quyết."""
     cursor = connection.cursor()
 
     # TelcoRaw: chép nguyên văn từng ô của CSV (chưa cắt khoảng trắng)
     raw_rows = [tuple(row) for row in raw_data.itertuples(index=False, name=None)]
     cursor.executemany(build_insert_sql("TelcoRaw", CSV_COLUMNS), raw_rows)
 
-    # Customers phải vào trước vì CustomerSnapshots có khóa ngoại tới nó
+    # Customers phải vào trước vì hai bảng sau có khóa ngoại tới nó
     cursor.executemany(build_insert_sql("Customers", CUSTOMER_COLUMNS), customer_rows)
     cursor.executemany(build_insert_sql("CustomerSnapshots", SNAPSHOT_COLUMNS), snapshot_rows)
+    cursor.executemany(build_insert_sql("CustomerContracts", CONTRACT_COLUMNS), contract_rows)
 
 
 def count_value(connection, sql_text):
@@ -248,6 +287,8 @@ def run_checks(connection, expected):
          count_value(connection, "SELECT COUNT(*) FROM Customers"), rows),
         ("CustomerSnapshots: số dòng",
          count_value(connection, "SELECT COUNT(*) FROM CustomerSnapshots"), rows),
+        ("CustomerContracts: số dòng",
+         count_value(connection, "SELECT COUNT(*) FROM CustomerContracts"), rows),
         ("CustomerSnapshots: TotalCharges NULL",
          count_value(connection,
                      "SELECT COUNT(*) FROM CustomerSnapshots WHERE TotalCharges IS NULL"),
@@ -265,6 +306,13 @@ def run_checks(connection, expected):
                      "SELECT COUNT(*) FROM CustomerSnapshots s "
                      "LEFT JOIN Customers c ON s.CustomerID = c.CustomerID "
                      "WHERE c.CustomerID IS NULL"),
+         0),
+        ("CustomerContracts có EffectiveTo khác NULL (phải là 0: ai cũng đang hiệu lực)",
+         count_value(connection,
+                     "SELECT COUNT(*) FROM CustomerContracts WHERE EffectiveTo IS NOT NULL"),
+         0),
+        ("CustomerContracts khác snapshot (dịch vụ, hợp đồng, mức phí, ngày)",
+         count_value(connection, build_contract_mismatch_sql()),
          0),
         ("Customers có CustomerStatus khác 'Active' (D3: phải là 0)",
          count_value(connection,
@@ -312,29 +360,41 @@ def connect_sql_server(server, database):
     return connection
 
 
-def check_tables_ready(connection):
-    """Phải có TelcoRaw và cả 3 bảng phải đang trống. Không thì dừng."""
-    for table_name in ["TelcoRaw", "Customers", "CustomerSnapshots"]:
+def check_tables_ready(connection, expected_check_count):
+    """Phải có đủ 4 bảng, cả 4 đang trống, và đã chạy constraints_bo_sung.sql. Không thì dừng."""
+    for table_name in TABLES_MUST_BE_EMPTY:
         table_exists = count_value(
             connection, "SELECT COUNT(*) FROM sys.tables WHERE name = '" + table_name + "'"
         )
         if table_exists == 0:
             if table_name == "TelcoRaw":
                 raise RuntimeError("Chưa có bảng TelcoRaw. Chạy database/staging.sql trong SSMS trước.")
-            raise RuntimeError("Chưa có bảng " + table_name + ". Chạy schema.sql trước.")
+            raise RuntimeError(
+                "Chưa có bảng " + table_name + ". Chạy schema.sql (bản mới, có đủ 11 bảng nghiệp vụ) trước."
+            )
 
         row_count = count_value(connection, "SELECT COUNT(*) FROM " + table_name)
         if row_count > 0:
             raise RuntimeError(
                 "Bảng " + table_name + " đã có " + str(row_count) + " dòng. "
-                "Script không xóa gì. Muốn nạp lại: xóa database, chạy lại 2 file SQL rồi chạy script này."
+                "Script không xóa gì. Muốn nạp lại: xóa database, chạy lại các file SQL rồi chạy script này."
             )
+
+    # Đã chạy constraints_bo_sung.sql chưa? (6 CHECK nhiều cột nằm ở file đó)
+    check_count = count_value(connection, "SELECT COUNT(*) FROM sys.check_constraints")
+    if check_count < expected_check_count:
+        raise RuntimeError(
+            "Database mới có " + str(check_count) + " CHECK, cần " + str(expected_check_count) + ". "
+            "Chạy database/constraints_bo_sung.sql (sau schema.sql) rồi chạy lại script này."
+        )
 
 
 def main():
     config = load_config()
     csv_path = PROJECT_ROOT / config["csv_relative_path"]
     snapshot_date = datetime.strptime(config["snapshot_date"], "%Y-%m-%d")
+    # Số CHECK đúng khi đã chạy cả schema.sql và constraints_bo_sung.sql (6 + 6)
+    expected_check_count = config["expected"].get("check_constraints", 12)
 
     print("File CSV     :", csv_path)
     print("SnapshotDate :", config["snapshot_date"], "(ngày cố định, EstimatedJoinDate là ngày ước lượng)")
@@ -354,10 +414,11 @@ def main():
     print("Bước 1: CSV hợp lệ,", len(raw_data), "dòng")
 
     # Bước 2: biến đổi thành các dòng sẽ ghi
-    customer_rows, snapshot_rows = build_rows(stripped_data, snapshot_date)
-    print("Bước 2: đã chuẩn bị", len(customer_rows), "khách và", len(snapshot_rows), "snapshot")
+    customer_rows, snapshot_rows, contract_rows = build_rows(stripped_data, snapshot_date)
+    print("Bước 2: đã chuẩn bị", len(customer_rows), "khách,", len(snapshot_rows),
+          "snapshot và", len(contract_rows), "dòng hợp đồng nghiệp vụ")
 
-    # Bước 3: nối database, từ chối nếu đã có dữ liệu
+    # Bước 3: nối database, từ chối nếu thiếu bảng, thiếu CHECK hoặc đã có dữ liệu
     try:
         connection = connect_sql_server(config["server"], config["database"])
     except Exception as error:
@@ -366,17 +427,17 @@ def main():
         return
 
     try:
-        check_tables_ready(connection)
+        check_tables_ready(connection, expected_check_count)
     except RuntimeError as error:
         print("DỪNG, chưa ghi gì:")
         print(error)
         connection.close()
         return
-    print("Bước 3: kết nối OK, TelcoRaw và 2 bảng đích đang trống")
+    print("Bước 3: kết nối OK, đủ 4 bảng đích đang trống, đủ", expected_check_count, "CHECK")
 
     # Bước 4: ghi, đếm lại, đúng hết mới commit
     try:
-        insert_all(connection, raw_data, customer_rows, snapshot_rows)
+        insert_all(connection, raw_data, customer_rows, snapshot_rows, contract_rows)
         checks = run_checks(connection, config["expected"])
     except Exception as error:
         connection.rollback()

@@ -1,15 +1,16 @@
-/*==============================================================*/
+﻿/*==============================================================*/
 /* XEM KẾT QUẢ SAU KHI NẠP TELCO (chỉ đọc, không sửa gì)        */
 /* Cách chạy: mở trong SSMS, ô database chọn CRM_Churn, F5.     */
-/* Kết quả: 4 lưới xếp dọc (kéo thanh cuộn của khung Results).  */
+/* Kết quả: 5 lưới xếp dọc (kéo thanh cuộn của khung Results).  */
 /*==============================================================*/
 USE CRM_Churn;
 GO
 
--- Lưới 1: số dòng từng bảng đã có dữ liệu (kỳ vọng 7043 / 7043 / 7043)
+-- Lưới 1: số dòng từng bảng đã có dữ liệu (kỳ vọng 7043 / 7043 / 7043 / 7043)
 SELECT N'TelcoRaw' AS Bang, COUNT(*) AS SoDong FROM TelcoRaw
 UNION ALL SELECT N'Customers',         COUNT(*) FROM Customers
-UNION ALL SELECT N'CustomerSnapshots', COUNT(*) FROM CustomerSnapshots;
+UNION ALL SELECT N'CustomerSnapshots', COUNT(*) FROM CustomerSnapshots
+UNION ALL SELECT N'CustomerContracts', COUNT(*) FROM CustomerContracts;
 
 -- Lưới 2: nhãn Churn (kỳ vọng Yes 1869, No 5174, TotalCharges NULL = 11)
 SELECT ChurnLabel,
@@ -30,4 +31,11 @@ SELECT TOP 3 customerID, tenure, TotalCharges, LEN(TotalCharges) AS Dai_KhongTin
        DATALENGTH(TotalCharges) AS Dai_TinhCaDauCach
 FROM TelcoRaw
 WHERE LTRIM(RTRIM(TotalCharges)) = '';
+
+-- Lưới 5: CustomerContracts (hợp đồng/dịch vụ NGHIỆP VỤ, chép từ snapshot).
+-- Kỳ vọng: 5 dòng, EffectiveFrom = 2026-09-30, EffectiveTo = NULL, UpdatedByStaffID = NULL.
+SELECT TOP 5 CustomerID, EffectiveFrom, EffectiveTo, Contract, InternetService,
+       MonthlyCharges, UpdatedByStaffID
+FROM CustomerContracts
+ORDER BY CustomerID;
 GO
