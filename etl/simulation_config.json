@@ -1,0 +1,67 @@
+{
+  "_ghi_chu": "Cau hinh sinh du lieu MO PHONG cho Interactions va Tickets (de tai 18, Muc 1). Doi bat ky so nao o day cung lam ket qua doi, nen file nay phai nam trong repo de tai lap (R-05, L1). Server, database, SnapshotDate va so dong ky vong lay tu etl/config.json.",
+
+  "seed": 42,
+
+  "window_days": 730,
+  "open_ticket_recent_days": 90,
+
+  "interactions_per_customer": { "min": 5, "max": 20 },
+
+  "tickets_per_customer_weights": [0.30, 0.30, 0.20, 0.10, 0.07, 0.03],
+
+  "channel_weights": { "Phone": 0.35, "Email": 0.25, "Chat": 0.25, "Web": 0.15 },
+  "interaction_type_weights": { "Inquiry": 0.35, "Support": 0.30, "Complaint": 0.20, "Renewal": 0.15 },
+  "interaction_result_weights": { "Resolved": 0.70, "Follow-up": 0.20, "Escalated": 0.10 },
+
+  "ticket_category_weights": { "Billing": 0.35, "Technical": 0.40, "Service": 0.25 },
+  "ticket_priority_weights": { "Low": 0.45, "Medium": 0.35, "High": 0.20 },
+  "ticket_status_weights": { "Closed": 0.72, "InProgress": 0.15, "Open": 0.13 },
+
+  "resolution_hours": {
+    "Low": [8, 336],
+    "Medium": [4, 168],
+    "High": [2, 72]
+  },
+
+  "satisfaction_given_probability": 0.60,
+  "satisfaction_score_weights": { "1": 0.05, "2": 0.10, "3": 0.20, "4": 0.35, "5": 0.30 },
+
+  "descriptions": {
+    "Inquiry": [
+      "[Mô phỏng] Khách hỏi về cước hàng tháng và các gói đang dùng.",
+      "[Mô phỏng] Khách hỏi cách xem hóa đơn điện tử.",
+      "[Mô phỏng] Khách hỏi về điều kiện nâng cấp gói dịch vụ."
+    ],
+    "Support": [
+      "[Mô phỏng] Khách nhờ hỗ trợ cài đặt thiết bị.",
+      "[Mô phỏng] Khách báo tốc độ kết nối chậm, nhân viên hướng dẫn kiểm tra.",
+      "[Mô phỏng] Khách nhờ hỗ trợ đổi mật khẩu thư điện tử."
+    ],
+    "Complaint": [
+      "[Mô phỏng] Khách phản ánh hóa đơn tháng này cao bất thường.",
+      "[Mô phỏng] Khách phản ánh đường truyền bị gián đoạn nhiều lần.",
+      "[Mô phỏng] Khách phản ánh chờ hỗ trợ quá lâu."
+    ],
+    "Renewal": [
+      "[Mô phỏng] Khách hỏi về gia hạn hợp đồng.",
+      "[Mô phỏng] Khách hỏi ưu đãi khi gia hạn hợp đồng dài hạn.",
+      "[Mô phỏng] Nhân viên liên hệ nhắc khách sắp hết hạn hợp đồng."
+    ]
+  },
+
+  "resolutions": {
+    "Billing": [
+      "[Mô phỏng] Đã kiểm tra và điều chỉnh hóa đơn.",
+      "[Mô phỏng] Đã giải thích các khoản phí cho khách."
+    ],
+    "Technical": [
+      "[Mô phỏng] Đã xử lý sự cố đường truyền từ xa.",
+      "[Mô phỏng] Đã hướng dẫn khởi động lại và cấu hình thiết bị."
+    ],
+    "Service": [
+      "[Mô phỏng] Đã cập nhật thông tin dịch vụ theo yêu cầu.",
+      "[Mô phỏng] Đã tư vấn gói dịch vụ phù hợp."
+    ]
+  }
+}

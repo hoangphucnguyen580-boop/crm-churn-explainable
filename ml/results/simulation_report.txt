@@ -1,0 +1,95 @@
+BÁO CÁO KIỂM DỮ LIỆU MÔ PHỎNG: Interactions và Tickets (đề tài 18, Mức 1)
+Dữ liệu này là MÔ PHỎNG (IsSimulated = 1), chỉ để demo chức năng CRM.
+Không dùng để huấn luyện hay đánh giá mô hình ML ở Mức 1 (L3, D-04).
+
+Tham số:
+  seed                  = 42
+  SnapshotDate          = 2026-09-30
+  cửa sổ thời gian      = max(EstimatedJoinDate, SnapshotDate - 730 ngày) đến hết ngày SnapshotDate
+  Python                = 3.14.6
+  số khách              = 7043
+  số Interactions sinh  = 87662
+  số Tickets sinh       = 10195
+  StaffID, AssignedStaffID = NULL (chưa seed Staff)
+
+Tự kiểm trong bộ nhớ (trước khi ghi):
+  ĐẠT : Tương tác mồ côi (CustomerID không có trong danh sách khách) = 0
+  ĐẠT : Ticket mồ côi = 0
+  ĐẠT : Khách có số tương tác ngoài khoảng 5 đến 20 = 0
+  ĐẠT : Khách có hơn 5 ticket = 0
+  ĐẠT : Tương tác nằm ngoài cửa sổ thời gian của khách = 0
+  ĐẠT : Ticket (ngày tạo hoặc ngày đóng) nằm ngoài cửa sổ thời gian của khách = 0
+  ĐẠT : Tương tác có giá trị kênh/loại/kết quả ngoài danh sách = 0
+  ĐẠT : Ticket có giá trị loại/ưu tiên/trạng thái ngoài danh sách = 0
+  ĐẠT : Tương tác có IsSimulated khác 1 = 0
+  ĐẠT : Ticket có IsSimulated khác 1 = 0
+  ĐẠT : Ticket Closed thiếu ClosedAt = 0
+  ĐẠT : Ticket chưa Closed mà có ClosedAt = 0
+  ĐẠT : Ticket có ClosedAt sớm hơn CreatedAt = 0
+  ĐẠT : Ticket có điểm hài lòng ngoài 1 đến 5 = 0
+  ĐẠT : Ticket chưa Closed mà có điểm hài lòng = 0
+  ĐẠT : Ticket Open/InProgress tạo quá xa SnapshotDate (hơn 90 ngày) = 0
+
+Đối chiếu trong database (trước khi commit):
+  ĐẠT : Interactions: số dòng = 87662
+  ĐẠT : Tickets: số dòng = 10195
+  ĐẠT : Interactions mồ côi (không có khách) = 0
+  ĐẠT : Tickets mồ côi (không có khách) = 0
+  ĐẠT : Khách có số tương tác ngoài khoảng 5 đến 20 = 0
+  ĐẠT : Khách có hơn 5 ticket = 0
+  ĐẠT : Interactions có IsSimulated khác 1 = 0
+  ĐẠT : Tickets có IsSimulated khác 1 = 0
+  ĐẠT : Interactions có StaffID khác NULL (chưa seed Staff) = 0
+  ĐẠT : Tickets có AssignedStaffID khác NULL (chưa seed Staff) = 0
+  ĐẠT : Interactions sau cuối ngày SnapshotDate = 0
+  ĐẠT : Interactions trước mốc SnapshotDate - 730 ngày = 0
+  ĐẠT : Interactions sớm hơn EstimatedJoinDate của khách = 0
+  ĐẠT : Tickets tạo sau cuối ngày SnapshotDate = 0
+  ĐẠT : Tickets đóng sau cuối ngày SnapshotDate = 0
+  ĐẠT : Tickets tạo trước mốc SnapshotDate - 730 ngày = 0
+  ĐẠT : Tickets tạo sớm hơn EstimatedJoinDate của khách = 0
+  ĐẠT : Tickets Closed thiếu ClosedAt, hoặc chưa Closed mà có ClosedAt = 0
+  ĐẠT : Tickets có ClosedAt sớm hơn CreatedAt = 0
+  ĐẠT : Tickets có điểm hài lòng nhưng chưa Closed = 0
+  ĐẠT : Tickets Open/InProgress tạo quá xa SnapshotDate (hơn 90 ngày) = 0
+  ĐẠT : Interactions có kênh/loại/kết quả ngoài danh sách = 0
+  ĐẠT : Tickets có loại/ưu tiên/trạng thái ngoài danh sách = 0
+
+Phân bố giá trị đã ghi:
+Interactions theo kênh:
+    Chat = 21921
+    Email = 22007
+    Phone = 30559
+    Web = 13175
+Interactions theo loại:
+    Complaint = 17553
+    Inquiry = 30662
+    Renewal = 13208
+    Support = 26239
+Interactions theo kết quả:
+    Escalated = 8831
+    Follow-up = 17429
+    Resolved = 61402
+Tickets theo trạng thái:
+    Closed = 7381
+    InProgress = 1531
+    Open = 1283
+Tickets theo ưu tiên:
+    High = 1989
+    Low = 4544
+    Medium = 3662
+Tickets theo loại:
+    Billing = 3616
+    Service = 2513
+    Technical = 4066
+Tickets Closed theo điểm hài lòng (NULL = không ghi điểm):
+    NULL = 2989
+    1 = 219
+    2 = 416
+    3 = 844
+    4 = 1579
+    5 = 1334
+
+Kiểm độc lập với nhãn (CHỈ ĐỂ KIỂM SAU KHI SINH; dữ liệu sinh KHÔNG đọc nhãn Churn, L2):
+    ChurnLabel = No: 5174 khách; tương tác TB/khách = 12.43; tỷ lệ Complaint = 0.200; ticket TB/khách = 1.46
+    ChurnLabel = Yes: 1869 khách; tương tác TB/khách = 12.48; tỷ lệ Complaint = 0.201; ticket TB/khách = 1.40
