@@ -1,0 +1,35 @@
+﻿Mô hình,Tham số,PR-AUC CV (trung bình 5 fold),Độ lệch chuẩn giữa các fold,Hạng
+Logistic Regression,"{""C"": 0.01, ""class_weight"": null}",0.6576,0.0166,7
+Logistic Regression,"{""C"": 0.01, ""class_weight"": ""balanced""}",0.6572,0.017,8
+Logistic Regression,"{""C"": 0.1, ""class_weight"": null}",0.6607,0.0191,3
+Logistic Regression,"{""C"": 0.1, ""class_weight"": ""balanced""}",0.6592,0.0192,5
+Logistic Regression,"{""C"": 1, ""class_weight"": null}",0.6614,0.0195,1
+Logistic Regression,"{""C"": 1, ""class_weight"": ""balanced""}",0.66,0.0195,4
+Logistic Regression,"{""C"": 10, ""class_weight"": null}",0.6608,0.0187,2
+Logistic Regression,"{""C"": 10, ""class_weight"": ""balanced""}",0.6589,0.019,6
+Random Forest,"{""class_weight"": null, ""max_depth"": 6, ""min_samples_leaf"": 1}",0.6625,0.0157,3
+Random Forest,"{""class_weight"": null, ""max_depth"": 6, ""min_samples_leaf"": 5}",0.6617,0.0165,4
+Random Forest,"{""class_weight"": null, ""max_depth"": 6, ""min_samples_leaf"": 10}",0.6616,0.0169,5
+Random Forest,"{""class_weight"": null, ""max_depth"": 10, ""min_samples_leaf"": 1}",0.6575,0.0212,12
+Random Forest,"{""class_weight"": null, ""max_depth"": 10, ""min_samples_leaf"": 5}",0.6608,0.0191,7
+Random Forest,"{""class_weight"": null, ""max_depth"": 10, ""min_samples_leaf"": 10}",0.6644,0.0197,1
+Random Forest,"{""class_weight"": null, ""max_depth"": null, ""min_samples_leaf"": 1}",0.6135,0.0303,17
+Random Forest,"{""class_weight"": null, ""max_depth"": null, ""min_samples_leaf"": 5}",0.658,0.0212,11
+Random Forest,"{""class_weight"": null, ""max_depth"": null, ""min_samples_leaf"": 10}",0.6628,0.02,2
+Random Forest,"{""class_weight"": ""balanced"", ""max_depth"": 6, ""min_samples_leaf"": 1}",0.657,0.0154,14
+Random Forest,"{""class_weight"": ""balanced"", ""max_depth"": 6, ""min_samples_leaf"": 5}",0.6574,0.0151,13
+Random Forest,"{""class_weight"": ""balanced"", ""max_depth"": 6, ""min_samples_leaf"": 10}",0.6583,0.0151,10
+Random Forest,"{""class_weight"": ""balanced"", ""max_depth"": 10, ""min_samples_leaf"": 1}",0.6537,0.0192,16
+Random Forest,"{""class_weight"": ""balanced"", ""max_depth"": 10, ""min_samples_leaf"": 5}",0.6602,0.0196,8
+Random Forest,"{""class_weight"": ""balanced"", ""max_depth"": 10, ""min_samples_leaf"": 10}",0.6613,0.0198,6
+Random Forest,"{""class_weight"": ""balanced"", ""max_depth"": null, ""min_samples_leaf"": 1}",0.61,0.0303,18
+Random Forest,"{""class_weight"": ""balanced"", ""max_depth"": null, ""min_samples_leaf"": 5}",0.6548,0.0238,15
+Random Forest,"{""class_weight"": ""balanced"", ""max_depth"": null, ""min_samples_leaf"": 10}",0.6594,0.0207,9
+Gradient Boosting,"{""learning_rate"": 0.05, ""max_depth"": 2, ""n_estimators"": 100}",0.6644,0.0219,7
+Gradient Boosting,"{""learning_rate"": 0.05, ""max_depth"": 2, ""n_estimators"": 200}",0.6702,0.022,1
+Gradient Boosting,"{""learning_rate"": 0.05, ""max_depth"": 3, ""n_estimators"": 100}",0.6699,0.0215,2
+Gradient Boosting,"{""learning_rate"": 0.05, ""max_depth"": 3, ""n_estimators"": 200}",0.6695,0.0223,3
+Gradient Boosting,"{""learning_rate"": 0.1, ""max_depth"": 2, ""n_estimators"": 100}",0.6695,0.0221,4
+Gradient Boosting,"{""learning_rate"": 0.1, ""max_depth"": 2, ""n_estimators"": 200}",0.6664,0.021,6
+Gradient Boosting,"{""learning_rate"": 0.1, ""max_depth"": 3, ""n_estimators"": 100}",0.6671,0.0232,5
+Gradient Boosting,"{""learning_rate"": 0.1, ""max_depth"": 3, ""n_estimators"": 200}",0.6611,0.0162,8

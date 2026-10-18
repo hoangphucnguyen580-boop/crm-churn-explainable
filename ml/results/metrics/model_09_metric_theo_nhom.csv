@@ -1,0 +1,18 @@
+﻿Chỉ tiêu nhóm,Nhóm,Số khách,Số khách nhãn churn,Tỷ lệ nhãn churn (%),Tỷ lệ bị gắn cờ (%),Precision,Recall,FP,FN
+Loại hợp đồng,Month-to-month,773,329,42.56,66.88,0.544,0.854,236,48
+Loại hợp đồng,One year,300,36,12.0,2.33,0.286,0.056,5,34
+Loại hợp đồng,Two year,336,9,2.68,0.0,,0.0,0,9
+Nhóm tenure (tháng),0–6,311,173,55.63,78.14,0.638,0.896,88,18
+Nhóm tenure (tháng),7–12,138,42,30.43,47.83,0.439,0.69,37,13
+Nhóm tenure (tháng),13–24,206,60,29.13,48.06,0.495,0.817,50,11
+Nhóm tenure (tháng),25–36,163,40,24.54,34.36,0.518,0.725,27,11
+Nhóm tenure (tháng),37–48,141,24,17.02,21.28,0.333,0.417,20,14
+Nhóm tenure (tháng),49–60,174,19,10.92,12.64,0.364,0.421,14,11
+Nhóm tenure (tháng),>60,276,16,5.8,2.9,0.375,0.188,5,13
+Dịch vụ Internet,DSL,484,97,20.04,22.73,0.509,0.577,54,41
+Dịch vụ Internet,Fiber optic,613,252,41.11,63.78,0.558,0.865,173,34
+Dịch vụ Internet,No,312,25,8.01,7.37,0.391,0.36,14,16
+Phương thức thanh toán,Electronic check,474,206,43.46,67.3,0.564,0.874,139,26
+Phương thức thanh toán,Mailed check,326,60,18.4,26.99,0.432,0.633,50,22
+Phương thức thanh toán,Bank transfer (automatic),300,57,19.0,19.0,0.596,0.596,23,23
+Phương thức thanh toán,Credit card (automatic),309,51,16.5,19.42,0.517,0.608,29,20

@@ -1,0 +1,3 @@
+﻿Mức,Quy tắc chọn,Ngưỡng,Precision (out-of-fold),Recall (out-of-fold),Precision (test),Recall (test),F1 (test),Tỷ lệ khách bị gắn cờ (test)
+Medium,Recall >= 0.75 trên điểm out-of-fold,0.3148,0.5554,0.7505,0.5401,0.7567,0.6303,0.3719
+High,"Precision >= 0.60 trên điểm out-of-fold, gắn cờ >= 100 khách",0.3866,0.6001,0.6635,0.5853,0.6791,0.6287,0.308

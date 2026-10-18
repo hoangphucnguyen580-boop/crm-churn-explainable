@@ -1,0 +1,5 @@
+﻿Loại,Số khách,Điểm TB,tenure TB (tháng),Mức phí hằng tháng TB (dữ liệu mẫu),% hợp đồng Month-to-month,% Internet Fiber optic,% thanh toán Electronic check
+TP (bắt đúng),283,0.593,11.8,75.0,99.3,77.0,63.6
+FP (gắn cờ nhầm),241,0.491,17.8,74.6,97.9,71.8,57.7
+FN (bỏ sót),91,0.168,30.9,65.9,52.7,37.4,28.6
+"TN (đúng, ở lại)",794,0.093,43.5,56.8,26.2,23.7,16.2

@@ -1,0 +1,5 @@
+﻿Mô hình,Tham số tốt nhất,PR-AUC CV (trung bình 5 fold),Độ lệch chuẩn giữa các fold,ROC-AUC (out-of-fold),"F1 tại ngưỡng 0,5 (out-of-fold)",Brier (out-of-fold),"Ngưỡng Recall >= 0,75"
+Dummy,{},0.2654,0.0001,0.4999,0.0,0.1949,
+Logistic Regression,"{""C"": 1, ""class_weight"": null}",0.6614,0.0218,0.8456,0.5929,0.1351,0.3187
+Random Forest,"{""class_weight"": null, ""max_depth"": 10, ""min_samples_leaf"": 10}",0.6644,0.0221,0.8473,0.5743,0.1345,0.317
+Gradient Boosting,"{""learning_rate"": 0.05, ""max_depth"": 2, ""n_estimators"": 200}",0.6702,0.0246,0.8493,0.5859,0.1335,0.3148

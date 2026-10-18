@@ -1,0 +1,22 @@
+﻿Cột,Kiểu sau khi ép,Số giá trị khác nhau,Số ô trống,Giá trị (nếu ≤ 6)
+customerID,str,7043,0,(nhiều giá trị)
+gender,str,2,0,Female; Male
+SeniorCitizen,int64,2,0,0; 1
+Partner,str,2,0,No; Yes
+Dependents,str,2,0,No; Yes
+tenure,int64,73,0,(nhiều giá trị)
+PhoneService,str,2,0,No; Yes
+MultipleLines,str,3,0,No; No phone service; Yes
+InternetService,str,3,0,DSL; Fiber optic; No
+OnlineSecurity,str,3,0,No; No internet service; Yes
+OnlineBackup,str,3,0,No; No internet service; Yes
+DeviceProtection,str,3,0,No; No internet service; Yes
+TechSupport,str,3,0,No; No internet service; Yes
+StreamingTV,str,3,0,No; No internet service; Yes
+StreamingMovies,str,3,0,No; No internet service; Yes
+Contract,str,3,0,Month-to-month; One year; Two year
+PaperlessBilling,str,2,0,No; Yes
+PaymentMethod,str,4,0,Bank transfer (automatic); Credit card (automatic); Electronic check; Mailed check
+MonthlyCharges,float64,1585,0,(nhiều giá trị)
+TotalCharges,float64,6530,11,(nhiều giá trị)
+Churn,str,2,0,No; Yes

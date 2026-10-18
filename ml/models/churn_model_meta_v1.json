@@ -1,0 +1,147 @@
+{
+  "model_name": "Gradient Boosting",
+  "model_key": "GradientBoosting",
+  "calibrated": false,
+  "version": "v1",
+  "train_date": "2026-10-18T22:19:19",
+  "seed": 42,
+  "threshold": 0.3147808667177504,
+  "threshold_medium": 0.3147808667177504,
+  "threshold_high": 0.3865623538084404,
+  "thresholds_consistent": true,
+  "feature_columns": [
+    "SeniorCitizen",
+    "tenure",
+    "MonthlyCharges",
+    "TotalCharges",
+    "gender",
+    "Partner",
+    "Dependents",
+    "PhoneService",
+    "MultipleLines",
+    "InternetService",
+    "OnlineSecurity",
+    "OnlineBackup",
+    "DeviceProtection",
+    "TechSupport",
+    "StreamingTV",
+    "StreamingMovies",
+    "Contract",
+    "PaperlessBilling",
+    "PaymentMethod"
+  ],
+  "numeric_columns": [
+    "SeniorCitizen",
+    "tenure",
+    "MonthlyCharges",
+    "TotalCharges"
+  ],
+  "categorical_columns": [
+    "gender",
+    "Partner",
+    "Dependents",
+    "PhoneService",
+    "MultipleLines",
+    "InternetService",
+    "OnlineSecurity",
+    "OnlineBackup",
+    "DeviceProtection",
+    "TechSupport",
+    "StreamingTV",
+    "StreamingMovies",
+    "Contract",
+    "PaperlessBilling",
+    "PaymentMethod"
+  ],
+  "best_params": {
+    "learning_rate": 0.05,
+    "max_depth": 2,
+    "n_estimators": 200
+  },
+  "selection_note": "PR-AUC CV của Gradient Boosting hơn Random Forest 0.0059, nhỏ hơn một độ lệch chuẩn giữa các fold (0.0246): chưa đủ cơ sở nói mô hình này hơn đáng kể.",
+  "metrics_cv": {
+    "pr_auc_mean": 0.6702460815158384,
+    "pr_auc_std_between_folds": 0.02460892270572266,
+    "brier_out_of_fold_base": 0.1334629235909351,
+    "brier_out_of_fold_calibrated": 0.13334163321520393
+  },
+  "metrics_test": {
+    "threshold": 0.3147808667177504,
+    "precision": 0.5400763358778626,
+    "recall": 0.7566844919786097,
+    "f1": 0.6302895322939868,
+    "roc_auc": 0.8456883412126379,
+    "pr_auc": 0.6629802041585003,
+    "brier": 0.13559550299542178,
+    "tn": 794,
+    "fp": 241,
+    "fn": 91,
+    "tp": 283,
+    "flagged_rate": 0.37189496096522356
+  },
+  "dataset": {
+    "file": "Telco-Customer-Churn.csv",
+    "sha256": "16320c9c1ec72448db59aa0a26a0b95401046bef5d02fd3aeb906448e3055e91",
+    "rows": 7043,
+    "train_rows": 5634,
+    "test_rows": 1409
+  },
+  "protocol": {
+    "test_size": 0.2,
+    "stratify": true,
+    "cv_folds": 5,
+    "cv_shuffle": true,
+    "scoring_for_selection": "average_precision",
+    "min_recall_medium": 0.75,
+    "min_precision_high": 0.6,
+    "min_flagged_high": 100,
+    "calibration_min_gain_brier": 0.001,
+    "searched_grids": {
+      "Dummy": {},
+      "LogisticRegression": {
+        "C": [
+          0.01,
+          0.1,
+          1,
+          10
+        ],
+        "class_weight": [
+          null,
+          "balanced"
+        ]
+      },
+      "RandomForest": {
+        "max_depth": [
+          6,
+          10,
+          null
+        ],
+        "min_samples_leaf": [
+          1,
+          5,
+          10
+        ],
+        "class_weight": [
+          null,
+          "balanced"
+        ]
+      },
+      "GradientBoosting": {
+        "n_estimators": [
+          100,
+          200
+        ],
+        "learning_rate": [
+          0.05,
+          0.1
+        ],
+        "max_depth": [
+          2,
+          3
+        ]
+      }
+    }
+  },
+  "library_versions": "python=3.14.6;scikit-learn=1.9.0;pandas=3.0.3;numpy=2.5.0;joblib=1.5.3",
+  "note": "Dữ liệu IBM Telco là dữ liệu mẫu. Điểm chỉ hỗ trợ chăm sóc khách hàng, không phải quan hệ nhân quả."
+}

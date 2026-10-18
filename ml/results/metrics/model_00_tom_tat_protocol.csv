@@ -1,0 +1,12 @@
+﻿Hạng mục,Giá trị
+Dữ liệu,"7043 khách (IBM Telco, dữ liệu mẫu)"
+Mã băm SHA-256 của CSV,16320c9c1ec72448db59aa0a26a0b95401046bef5d02fd3aeb906448e3055e91
+Chia train/test,"5634 / 1409 (80/20, stratify, seed 42)"
+Cross-validation,"StratifiedKFold 5 fold, xáo trộn, seed 42, chỉ trên train"
+Tiêu chí chọn mô hình,PR-AUC trung bình 5 fold (average_precision)
+Số đặc trưng,"19 (không có customerID, không có nhãn, không có dữ liệu mô phỏng)"
+Mô hình được chọn,Gradient Boosting
+Tham số tốt nhất,"{""learning_rate"": 0.05, ""max_depth"": 2, ""n_estimators"": 200}"
+Đã hiệu chuẩn (calibration),Không (Brier của bản gốc đã đủ tốt)
+Ngưỡng Medium (ModelVersions.Threshold),0.3148  — Recall >= 0.75 trên điểm out-of-fold
+Ngưỡng High,0.3866  — Precision >= 0.6 trên điểm out-of-fold
