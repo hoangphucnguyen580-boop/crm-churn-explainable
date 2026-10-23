@@ -1,0 +1,28 @@
+BÁO CÁO CHẤM ĐIỂM THEO LÔ (đề tài 18, Mức 1)
+Điểm chỉ hỗ trợ chăm sóc khách hàng, không phải quan hệ nhân quả (R-02, R-07).
+Đặc trưng lấy từ database: Customers + CustomerContracts (đang hiệu lực) + CustomerSnapshots.
+Không dùng nhãn Churn và không dùng dữ liệu mô phỏng Interactions/Tickets (D-04).
+
+Tham số:
+  mô hình              = Gradient Boosting v1
+  ModelVersionID       = 6
+  PredictionTime (lô)  = 2026-10-20 12:11:00
+  ngưỡng Medium / High = 0.3148 / 0.3866 (đọc từ RiskConfig)
+  số khách đã chấm     = 7043
+  scikit-learn         = 1.9.0
+
+Đối chiếu trong database (trước khi commit):
+  ĐẠT : ChurnPredictions: số dòng của lô = 7043
+  ĐẠT : ChurnPredictions: số khách khác nhau trong lô = 7043
+  ĐẠT : Lô có Probability ngoài [0, 1] = 0
+  ĐẠT : Lô có RiskLevel ngoài Low/Medium/High = 0
+  ĐẠT : Lô có RiskLevel không khớp ngưỡng RiskConfig (0.3148 / 0.3866) = 0
+  ĐẠT : Lô có InputJson NULL hoặc không phải JSON hợp lệ = 0
+  ĐẠT : Lô có TopFactorsJson khác NULL (Mức 2, phải để trống) = 0
+  ĐẠT : Điểm đọc lại từ database lệch điểm trong bộ nhớ tối đa < 1e-08 (chênh lớn nhất 5.00e-09) = 1
+  ĐẠT : Điểm từ database trùng cột 'selected' của test_scores.csv trên 1409 khách test (chênh lớn nhất 1.11e-16) = 1
+
+Phân bố mức risk:
+    Low = 4489 (63.7%)
+    Medium = 479 (6.8%)
+    High = 2075 (29.5%)
