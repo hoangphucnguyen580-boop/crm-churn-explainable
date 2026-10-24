@@ -80,6 +80,8 @@ public class AccountController : Controller
             CookieAuthenticationDefaults.AuthenticationScheme,
             new ClaimsPrincipal(identity));
 
+        await _db.WriteAuditAsync(staff.StaffId, "Login", "Staff", staff.StaffId.ToString());
+
         // Chỉ chuyển hướng tới địa chỉ nội bộ, chặn open redirect
         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
         {
@@ -93,6 +95,11 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
+        // Ghi audit TRƯỚC khi xóa cookie, vì sau đó không còn biết ai đăng xuất
+        var idText = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (int.TryParse(idText, out var staffId))
+            await _db.WriteAuditAsync(staffId, "Logout", "Staff", staffId.ToString());
+
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction(nameof(Login));
     }

@@ -9,9 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Bộ lọc toàn cục: MỌI Action đều yêu cầu đăng nhập, trừ chỗ gắn [AllowAnonymous].
 // Quên gắn [Authorize] thì mặc định vẫn bị chặn (R-11).
-builder.Services.AddControllersWithViews(options =>
+builder.Services.AddControllersWithViews(o =>
 {
-    options.Filters.Add(new AuthorizeFilter());
+    o.Filters.Add(new AuthorizeFilter());
+    o.Filters.Add<AuditUserFilter>();      
 });
 
 // Nối EF Core với SQL Server; chuỗi kết nối lấy từ user-secrets, không viết cứng ở đây
