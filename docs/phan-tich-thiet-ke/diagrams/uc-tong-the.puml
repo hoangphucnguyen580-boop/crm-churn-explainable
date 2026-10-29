@@ -1,0 +1,65 @@
+@startuml
+' Use case tổng thể: 3 vai trò kế thừa Agent <- Manager <- Admin, FastAPI là actor hệ thống
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Agent\n(ACT-03)" as ACT03
+actor "Manager\n(ACT-02)" as ACT02
+actor "Admin\n(ACT-01)" as ACT01
+actor "Dịch vụ dự báo\nFastAPI (ACT-04)" as ACT04 <<hệ thống>>
+
+ACT02 --|> ACT03
+ACT01 --|> ACT02
+
+rectangle "Hệ thống CRM dự báo khách hàng rời bỏ" {
+  usecase "UC-01\nĐăng nhập" as UC01
+  usecase "UC-02\nQuản lý khách hàng" as UC02
+  usecase "UC-03\nQuản lý tương tác" as UC03
+  usecase "UC-04\nXử lý ticket" as UC04
+  usecase "UC-05\nDự báo churn" as UC05
+  usecase "UC-06\nXem dashboard" as UC06
+  usecase "UC-07\nNhập khách từ CSV" as UC07
+  usecase "UC-08\nĐổi hợp đồng\nvà dịch vụ" as UC08
+  usecase "UC-09\nMở lại ticket" as UC09
+  usecase "UC-10\nCấu hình ngưỡng\nrủi ro" as UC10
+  usecase "UC-11\nXem nhật ký\nthao tác" as UC11
+  usecase "UC-12\nQuản lý người dùng\nvà vai trò" as UC12
+  usecase "UC-13\nXem phiên bản\nmô hình" as UC13
+  usecase "UC-14\nGhi nhật ký\nthao tác" as UC14
+}
+
+' Actor chính (đặt ở vai trò thấp nhất có quyền, vai trò cao hơn kế thừa)
+ACT03 --> UC01
+ACT03 --> UC02
+ACT03 --> UC03
+ACT03 --> UC04
+ACT03 --> UC05
+ACT02 --> UC06
+ACT02 --> UC07
+ACT02 --> UC08
+ACT02 --> UC09
+ACT02 --> UC10
+ACT02 --> UC13
+ACT01 --> UC11
+ACT01 --> UC12
+
+' Actor phụ
+UC05 --> ACT04
+
+' extend: use case mở rộng trỏ về use case gốc
+UC07 ..> UC02 : <<extend>>
+UC08 ..> UC02 : <<extend>>
+UC09 ..> UC04 : <<extend>>
+
+' include: ghi nhật ký tự động (UC-08, UC-09, UC-10, UC-12 cũng include UC-14, xem ghi chú bên dưới)
+UC02 ..> UC14 : <<include>>
+UC03 ..> UC14 : <<include>>
+UC04 ..> UC14 : <<include>>
+UC05 ..> UC14 : <<include>>
+
+note bottom of UC14
+  UC-08, UC-09, UC-10 và UC-12 cũng include UC-14
+  (không vẽ mũi tên để hình khỏi rối)
+end note
+@enduml

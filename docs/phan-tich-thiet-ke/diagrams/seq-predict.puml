@@ -1,0 +1,25 @@
+@startuml
+' Luồng gọi /predict từ Web (UC-05, khách có sẵn)
+title Luồng dự báo churn cho khách có sẵn (UC-05)
+skinparam shadowing false
+actor "Nhân viên" as U
+participant "Web CRM" as W
+database "SQL Server" as D
+participant "FastAPI" as F
+
+U -> W : Chọn "Dự báo churn" cho một khách
+W -> D : Đọc hồ sơ, hợp đồng đang hiệu lực, snapshot
+D --> W : 19 đặc trưng
+W -> F : POST /predict (19 đặc trưng, JSON)
+F --> W : churn_probability, model_version, latency_ms
+W -> D : Đọc RiskConfig (hai ngưỡng), tra ModelVersionID
+D --> W : Ngưỡng, ModelVersionID
+W -> W : Gán mức Low, Medium hoặc High
+W -> D : Lưu ChurnPredictions (kèm InputJson) và AuditLog
+D --> W : Đã lưu
+W --> U : Xác suất, mức rủi ro, phiên bản mô hình
+note over W, F
+  Lỗi API (chưa chạy, quá thời gian T, 422, 500)
+  hoặc lỗi lưu: Web báo lỗi, không báo thành công
+end note
+@enduml

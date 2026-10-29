@@ -1,0 +1,46 @@
+@startuml
+' Kiến trúc tổng thể: Web CRM, SQL Server, FastAPI, mô hình ML, và các script chạy ngoài luồng
+title Kiến trúc hệ thống CRM dự báo khách hàng rời bỏ
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+actor "Nhân viên\n(Agent, Manager, Admin)" as USER
+
+node "Máy chạy demo (Windows)" {
+  component "Trình duyệt" as BROWSER
+
+  package "Web CRM (ASP.NET Core MVC, .NET 9)\nhttps://localhost:7213" as WEB {
+    component "Controllers + Views\n(đăng nhập, khách hàng, tương tác,\nticket, dự báo, dashboard)" as CTRL
+    component "Phân quyền theo vai trò\n+ bộ lọc audit" as AUTH
+    component "EF Core (CrmDbContext)\n+ ghi AuditLog tự động" as EF
+    component "Lớp gọi dịch vụ dự báo\n(HttpClient, thời gian chờ T)" as CLIENT
+  }
+
+  package "Dịch vụ dự báo (FastAPI)\nhttp://127.0.0.1:8000" as API {
+    component "GET /health\nPOST /predict" as ENDPOINTS
+    component "Pipeline đã huấn luyện\n(.joblib) + metadata" as MODEL
+  }
+
+  database "SQL Server\nCRM_Churn (12 bảng nghiệp vụ\n+ TelcoRaw)" as DB
+
+  package "Chạy ngoài luồng (Python, dòng lệnh)" as OFFLINE {
+    component "ETL: tải, kiểm tra,\nnạp Telco, mô phỏng" as ETL
+    component "Huấn luyện + đăng ký mô hình\n(train, register_model)" as TRAIN
+    component "Chấm điểm theo lô\n(score_batch, dự phòng)" as BATCH
+  }
+}
+
+USER --> BROWSER
+BROWSER --> CTRL : HTTPS
+CTRL --> AUTH
+CTRL --> EF
+CTRL --> CLIENT
+EF --> DB : SQL
+CLIENT --> ENDPOINTS : HTTP JSON\n(19 đặc trưng)
+ENDPOINTS --> MODEL
+ETL --> DB : ghi trực tiếp
+TRAIN --> DB : ghi ModelVersions,\nRiskConfig
+TRAIN ..> MODEL : tạo file .joblib
+BATCH --> DB : ghi ChurnPredictions
+BATCH ..> MODEL : nạp .joblib
+@enduml

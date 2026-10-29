@@ -1,0 +1,48 @@
+@startuml
+' Activity: dự báo churn (UC-05), có nhánh lỗi API và lỗi lưu CSDL
+title Dự báo churn (UC-05)
+skinparam shadowing false
+|Nhân viên|
+start
+:Chọn "Dự báo churn";
+if (Cách dự báo?) then (khách có sẵn)
+  |Web CRM|
+  :Đọc 19 đặc trưng từ CSDL\n(hồ sơ, hợp đồng hiệu lực, snapshot);
+  if (Có snapshot và đúng một\nhợp đồng hiệu lực?) then (không)
+    :Báo "chưa đủ dữ liệu, dùng Nhập thủ công"\n(BR-14);
+    stop
+  endif
+else (nhập thủ công)
+  |Nhân viên|
+  :Nhập 19 đặc trưng;
+  |Web CRM|
+  if (Dữ liệu hợp lệ\n(danh sách giá trị, BR-15)?) then (không)
+    :Báo lỗi từng trường, không gọi API;
+    stop
+  endif
+endif
+|Web CRM|
+:Gửi 19 đặc trưng tới /predict\n(chờ tối đa T giây);
+|FastAPI|
+:Kiểm tra đầu vào,\ntính xác suất churn;
+|Web CRM|
+if (API trả kết quả hợp lệ\ntrong T giây?) then (không)
+  :Báo "dịch vụ dự báo chưa sẵn sàng\nhoặc lỗi", không ghi gì;
+  stop
+endif
+:Đọc ngưỡng từ RiskConfig,\ngán mức Low, Medium hoặc High;
+if (Ngưỡng hợp lệ\n(Medium < High)?) then (không)
+  :Báo lỗi cấu hình, không ghi gì;
+  stop
+endif
+|SQL Server|
+:Lưu ChurnPredictions (kèm InputJson),\nghi AuditLog;
+|Web CRM|
+if (Lưu thành công?) then (không)
+  :Báo "kết quả chưa được lưu",\nkhông báo thành công;
+  stop
+endif
+|Nhân viên|
+:Xem xác suất, mức rủi ro,\nphiên bản mô hình;
+stop
+@enduml

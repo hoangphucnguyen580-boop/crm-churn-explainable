@@ -1,0 +1,16 @@
+@startuml
+' State: vòng đời ticket (BR-01 đến BR-03)
+title Vòng đời ticket
+skinparam shadowing false
+[*] --> Open : Mở ticket
+Open --> InProgress : Phân công, chuyển InProgress
+InProgress --> Closed : Đóng ticket\n[có kết quả giải quyết;\nClosedAt = giờ hiện tại]
+Closed --> InProgress : Mở lại (Manager, Admin)\n[có lý do; xóa ClosedAt và điểm hài lòng]
+Open --> [*] : Xóa (Admin)
+InProgress --> [*] : Xóa (Admin)
+Closed --> [*] : Xóa (Admin)
+note right of Open
+  Không được đóng thẳng
+  Open sang Closed
+end note
+@enduml

@@ -1,0 +1,43 @@
+@startuml
+' Activity: xử lý ticket (UC-04) và mở lại (UC-09)
+title Xử lý ticket (UC-04) và mở lại ticket (UC-09)
+skinparam shadowing false
+|Nhân viên|
+start
+repeat
+  :Nhập khách, loại, mức ưu tiên;
+  |Hệ thống|
+  :Kiểm tra giá trị;
+backward:Báo lỗi từng trường;
+repeat while (Hợp lệ?) is (không) not (có)
+:Tạo ticket (Status = Open,\nCreatedAt = giờ hiện tại);
+:Ghi AuditLog;
+|Nhân viên|
+:Chọn ticket Open, phân công người phụ trách,\nđổi ưu tiên nếu cần, chuyển InProgress;
+|Hệ thống|
+:Lưu Status = InProgress, AssignedStaffID;
+:Ghi AuditLog;
+|Nhân viên|
+repeat
+  :Chọn "Đóng ticket", nhập kết quả giải quyết\n(điểm hài lòng 1 đến 5 nếu có);
+  |Hệ thống|
+  :Kiểm tra: kết quả không rỗng,\nđiểm 1 đến 5, ClosedAt không sớm hơn CreatedAt;
+backward:Báo lỗi, ticket giữ nguyên;
+repeat while (Hợp lệ?) is (không) not (có)
+:Lưu Status = Closed, ClosedAt,\nResolution, SatisfactionScore;
+:Ghi AuditLog;
+|Nhân viên|
+if (Cần mở lại?\n(chỉ Manager hoặc Admin)) then (có)
+  :Nhập lý do mở lại;
+  |Hệ thống|
+  if (Vai trò đủ quyền\nvà lý do hợp lệ?) then (có)
+    :Status = InProgress, xóa ClosedAt\nvà điểm hài lòng, lưu ReopenReason;
+    :Ghi AuditLog;
+    :Ticket quay lại xử lý như UC-04;
+  else (không)
+    :Từ chối, ticket giữ nguyên Closed;
+  endif
+else (không)
+endif
+stop
+@enduml
