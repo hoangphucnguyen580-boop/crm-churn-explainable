@@ -1,17 +1,15 @@
-﻿/* schema.sql - tao tu PDM_CRM_Churn_DeTai18 (PowerDesigner, SQL Server 2017)
+/* schema.sql - tao tu PDM_CRM_Churn_DeTai18 (PowerDesigner, SQL Server 2017)
    Doan dau (CREATE DATABASE, USE) duoc them tay; PowerDesigner sinh lai se mat doan nay.
    Chay SAU file nay: constraints_bo_sung.sql (cac CHECK nhieu cot). */
+/*==============================================================*/
+/* DBMS name:      Microsoft SQL Server 2017                    */
+/* Created on:     31/10/2026 9:21:06 SA                        */
+/*==============================================================*/
 IF DB_ID(N'CRM_Churn') IS NULL
     CREATE DATABASE CRM_Churn;
 GO
 USE CRM_Churn;
 GO
-
-/*==============================================================*/
-/* DBMS name:      Microsoft SQL Server 2017                    */
-/* Created on:     14/10/2026 1:12:14 CH                        */
-/*==============================================================*/
-
 
 /*==============================================================*/
 /* Table: AuditLog                                              */
@@ -195,6 +193,32 @@ create nonclustered index CO_FK on Interactions (CustomerID ASC)
 go
 
 /*==============================================================*/
+/* Table: LoginAttempts                                         */
+/*==============================================================*/
+create table LoginAttempts (
+   AttemptID            bigint               identity,
+   StaffID              int                  null,
+   UsernameTried        varchar(50)          not null,
+   AttemptedAt          datetime             not null default getdate(),
+   IsSuccess            bit                  not null,
+   FailReason           varchar(20)          null,
+   ClientIp             varchar(45)          null,
+   constraint PK_LOGINATTEMPTS primary key (AttemptID)
+)
+go
+
+/*==============================================================*/
+/* Index: IX_LOGINATTEMPTS_USER_THOIGIAN                        */
+/*==============================================================*/
+
+
+
+
+create nonclustered index IX_LOGINATTEMPTS_USER_THOIGIAN on LoginAttempts (UsernameTried ASC,
+  AttemptedAt ASC)
+go
+
+/*==============================================================*/
 /* Table: ModelVersions                                         */
 /*==============================================================*/
 create table ModelVersions (
@@ -353,6 +377,11 @@ go
 
 alter table Interactions
    add constraint FK_INTERACT_PHU_TRACH_STAFF foreign key (StaffID)
+      references Staff (StaffID)
+go
+
+alter table LoginAttempts
+   add constraint FK_LOGINATT_THU_DANG__STAFF foreign key (StaffID)
       references Staff (StaffID)
 go
 

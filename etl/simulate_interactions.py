@@ -406,7 +406,7 @@ def check_ready(connection, config, write_mode):
         if table_exists == 0:
             raise RuntimeError("Chưa có bảng " + table_name + ". Chạy schema.sql trước.")
 
-    expected_check_count = config["expected"].get("check_constraints", 12)
+    expected_check_count = config["expected"].get("check_constraints", 13)
     check_count = load_telco.count_value(connection, "SELECT COUNT(*) FROM sys.check_constraints")
     if check_count < expected_check_count:
         raise RuntimeError(

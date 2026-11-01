@@ -4,7 +4,7 @@ Tạo GÓI SCRIPT SQL THUẦN để gửi cô: cô chỉ cần SQL Server + SSMS
 Script đọc:
   - ml/data/raw/Telco-Customer-Churn.csv   (bản gốc, không sửa)
   - database/schema.sql                     (PDM sinh ra từ PowerDesigner)
-  - database/constraints_bo_sung.sql        (6 CHECK nhiều cột, chạy sau schema.sql)
+  - database/constraints_bo_sung.sql        (7 CHECK nhiều cột, chạy sau schema.sql)
   - database/staging.sql                    (tạo bảng TelcoRaw)
   - database/kiem_tra_sau_nap.sql           (kiểm tra sau khi nạp)
   - etl/config.json                         (SnapshotDate và các số kỳ vọng)
@@ -164,7 +164,7 @@ def build_load_sql(raw_data, config):
     database_name = config["database"]
     expected = config["expected"]
     snapshot_compact = config["snapshot_date"].replace("-", "")  # 2026-09-30 -> 20260930
-    expected_check_count = expected.get("check_constraints", 12)
+    expected_check_count = expected.get("check_constraints", 13)
 
     raw_statements = build_insert_raw_statements(raw_data)
     raw_block = "\n".join(raw_statements)
@@ -334,7 +334,7 @@ def build_readme(config, row_count):
         "GÓI SCRIPT SQL - DATABASE " + database_name + " (Đề tài 18: CRM tích hợp dự báo khách hàng rời bỏ)\n"
         "Sinh viên: Nguyễn Hoàng Phúc - lớp CC25TTH - MSSV 25TH2517\n"
         "\n"
-        "NỘI DUNG: schema 11 bảng nghiệp vụ của hệ thống CRM + bảng đổ tạm TelcoRaw, và dữ liệu\n"
+        "NỘI DUNG: schema 12 bảng nghiệp vụ của hệ thống CRM + bảng đổ tạm TelcoRaw, và dữ liệu\n"
         "IBM Telco Customer Churn sample dataset (" + str(row_count) + " khách hàng, 21 cột).\n"
         "Nguồn dữ liệu: https://github.com/IBM/telco-customer-churn-on-icp4d\n"
         "Đây là bộ dữ liệu mẫu phục vụ minh họa/giáo dục, không phải dữ liệu vận hành thực tế.\n"
@@ -347,9 +347,9 @@ def build_readme(config, row_count):
         "Nên chạy trên một server chưa có database " + database_name + " (hoặc database đang trống).\n"
         "\n"
         "  1. 00_create_database.sql        Tạo database " + database_name + " nếu chưa có.\n"
-        "  2. 01_schema.sql                 Tạo 11 bảng, khóa ngoại, default, UNIQUE và 6 CHECK một cột.\n"
-        "  3. 01b_constraints_bo_sung.sql   Thêm 6 CHECK nhiều cột (ALTER TABLE). Cuối file hiện\n"
-        "                                   TongSoCheck = 12, DuKien = 12.\n"
+        "  2. 01_schema.sql                 Tạo 12 bảng, khóa ngoại, default, UNIQUE và 6 CHECK một cột.\n"
+        "  3. 01b_constraints_bo_sung.sql   Thêm 7 CHECK nhiều cột (ALTER TABLE). Cuối file hiện\n"
+        "                                   TongSoCheck = 13, DuKien = 13.\n"
         "  4. 02_staging.sql                Tạo bảng TelcoRaw (chứa bản sao nguyên văn của CSV).\n"
         "  5. 03_load_telco.sql             Nạp dữ liệu. Chạy hơi lâu hơn các file kia (file khoảng 1 MB).\n"
         "                                   Cuối file hiện bảng đối chiếu 12 dòng; cột KetQua phải là ĐẠT hết\n"

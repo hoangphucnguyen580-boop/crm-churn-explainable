@@ -17,7 +17,7 @@ SERVER = "Admin-PC"
 DATABASE = "CRM_Churn"
 
 # Các bảng sẽ đếm số dòng để xem database đang trống hay đã có dữ liệu
-TABLES_TO_COUNT = ["AuditLog", "ChurnPredictions", "Role", "Staff", "Customers", "CustomerSnapshots", "Interactions", "ModelVersions", "RiskConfig", "Tickets"]
+TABLES_TO_COUNT = ["AuditLog", "ChurnPredictions", "CustomerContracts", "CustomerSnapshots", "Customers", "Interactions", "LoginAttempts", "ModelVersions", "RiskConfig", "Role", "Staff", "Tickets", "TelcoRaw"]
 
 
 def choose_driver(installed_drivers):
@@ -73,11 +73,11 @@ def main():
     cursor.execute("SELECT DB_NAME()")
     print("Đang nối vào database:", cursor.fetchone()[0])
 
-    # Bước 7: đếm bảng (phải là 10)
+    # Bước 7: đếm bảng (phải là 13: 12 bảng nghiệp vụ + TelcoRaw)
     cursor.execute("SELECT COUNT(*) FROM sys.tables")
-    print("Số bảng:", cursor.fetchone()[0])
+    print("Số bảng:", cursor.fetchone()[0], "(kỳ vọng 13: 12 bảng nghiệp vụ + TelcoRaw)")
 
-    # Bước 8: đếm số dòng từng bảng (hiện tại phải toàn 0)
+    # Bước 8: đếm số dòng từng bảng (chỉ để xem; trống hay đã nạp dữ liệu đều được)
     print("Số dòng hiện có:")
     for table_name in TABLES_TO_COUNT:
         cursor.execute("SELECT COUNT(*) FROM " + table_name)

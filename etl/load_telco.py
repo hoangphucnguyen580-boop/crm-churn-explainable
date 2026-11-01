@@ -370,7 +370,7 @@ def check_tables_ready(connection, expected_check_count):
             if table_name == "TelcoRaw":
                 raise RuntimeError("Chưa có bảng TelcoRaw. Chạy database/staging.sql trong SSMS trước.")
             raise RuntimeError(
-                "Chưa có bảng " + table_name + ". Chạy schema.sql (bản mới, có đủ 11 bảng nghiệp vụ) trước."
+                "Chưa có bảng " + table_name + ". Chạy schema.sql (bản mới, có đủ 12 bảng nghiệp vụ) trước."
             )
 
         row_count = count_value(connection, "SELECT COUNT(*) FROM " + table_name)
@@ -394,7 +394,7 @@ def main():
     csv_path = PROJECT_ROOT / config["csv_relative_path"]
     snapshot_date = datetime.strptime(config["snapshot_date"], "%Y-%m-%d")
     # Số CHECK đúng khi đã chạy cả schema.sql và constraints_bo_sung.sql (6 + 6)
-    expected_check_count = config["expected"].get("check_constraints", 12)
+    expected_check_count = config["expected"].get("check_constraints", 13)
 
     print("File CSV     :", csv_path)
     print("SnapshotDate :", config["snapshot_date"], "(ngày cố định, EstimatedJoinDate là ngày ước lượng)")

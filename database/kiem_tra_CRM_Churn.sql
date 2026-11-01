@@ -11,7 +11,7 @@
 /*     TelcoRaw phải giữ nguyên 7043 dòng trước và sau.         */
 /*                                                              */
 /* Chạy SAU: 01_schema.sql, 02_staging.sql, và                  */
-/*           constraints_bo_sung.sql (cho đủ 12 CHECK).         */
+/*           constraints_bo_sung.sql (cho đủ 13 CHECK).         */
 /* Cách chạy: mở trong SSMS, bấm Execute (F5) một lần.          */
 /* Lưu ý: số tự tăng (identity) vẫn nhích sau ROLLBACK, bình    */
 /* thường; code web không được gán cứng RoleID.                 */
@@ -27,21 +27,21 @@ SELECT MucKiemTra, ThucTe, DuKien,
        CASE WHEN ThucTe = DuKien THEN N'ĐẠT' ELSE N'SAI' END AS KetLuan
 FROM (
     SELECT 1 AS Stt, N'Bảng nghiệp vụ (không tính TelcoRaw)' AS MucKiemTra,
-           (SELECT COUNT(*) FROM sys.tables WHERE name <> 'TelcoRaw') AS ThucTe, 11 AS DuKien
+           (SELECT COUNT(*) FROM sys.tables WHERE name <> 'TelcoRaw') AS ThucTe, 12 AS DuKien
     UNION ALL
     SELECT 2, N'Bảng staging TelcoRaw (1 = đã tạo)',
            (SELECT COUNT(*) FROM sys.tables WHERE name = 'TelcoRaw'), 1
     UNION ALL
-    SELECT 3, N'Khóa ngoại',  (SELECT COUNT(*) FROM sys.foreign_keys), 12
+    SELECT 3, N'Khóa ngoại',  (SELECT COUNT(*) FROM sys.foreign_keys), 13
     UNION ALL
-    SELECT 4, N'Default',     (SELECT COUNT(*) FROM sys.default_constraints), 7
+    SELECT 4, N'Default',     (SELECT COUNT(*) FROM sys.default_constraints), 8
     UNION ALL
     SELECT 5, N'Unique',      (SELECT COUNT(*) FROM sys.key_constraints WHERE type = 'UQ'), 4
     UNION ALL
-    SELECT 6, N'Check (6 từ schema.sql + 6 từ constraints_bo_sung.sql)',
-           (SELECT COUNT(*) FROM sys.check_constraints), 12
+    SELECT 6, N'Check (6 từ schema.sql + 7 từ constraints_bo_sung.sql)',
+           (SELECT COUNT(*) FROM sys.check_constraints), 13
     UNION ALL
-    SELECT 7, N'Primary key', (SELECT COUNT(*) FROM sys.key_constraints WHERE type = 'PK'), 11
+    SELECT 7, N'Primary key', (SELECT COUNT(*) FROM sys.key_constraints WHERE type = 'PK'), 12
 ) AS Dem
 ORDER BY Stt;
 GO
@@ -87,6 +87,7 @@ UNION ALL SELECT N'CustomerContracts', COUNT(*) FROM CustomerContracts
 UNION ALL SELECT N'CustomerSnapshots', COUNT(*) FROM CustomerSnapshots
 UNION ALL SELECT N'Customers',         COUNT(*) FROM Customers
 UNION ALL SELECT N'Interactions',      COUNT(*) FROM Interactions
+UNION ALL SELECT N'LoginAttempts',      COUNT(*) FROM LoginAttempts
 UNION ALL SELECT N'ModelVersions',     COUNT(*) FROM ModelVersions
 UNION ALL SELECT N'RiskConfig',        COUNT(*) FROM RiskConfig
 UNION ALL SELECT N'Role',              COUNT(*) FROM Role
@@ -569,6 +570,83 @@ BEGIN CATCH
     INSERT INTO @KetQua VALUES (44, N'RiskConfig: khóa không phải ngưỡng, giá trị chữ', N'OK', N'Lỗi ' + CAST(ERROR_NUMBER() AS nvarchar(10)));
 END CATCH;
 
+/*==============================================================*/
+/* TEST LoginAttempts (D-25, Z-12): test 45 đến 51              */
+/* Dùng @StaffID của test 3. Test 49 bắt đúng bẫy CHECK UNKNOWN: */
+/* IsSuccess = 0 mà FailReason NULL phải bị chặn.               */
+/*==============================================================*/
+
+-- Test 45: đăng nhập thành công hợp lệ (IsSuccess = 1, không có lý do thất bại)
+BEGIN TRY
+    INSERT INTO LoginAttempts (UsernameTried, IsSuccess, FailReason, StaffID)
+    VALUES ('zz_user', 1, NULL, @StaffID);
+    INSERT INTO @KetQua VALUES (45, N'LoginAttempts: thành công hợp lệ', N'OK', N'OK');
+END TRY
+BEGIN CATCH
+    INSERT INTO @KetQua VALUES (45, N'LoginAttempts: thành công hợp lệ', N'OK', N'Lỗi ' + CAST(ERROR_NUMBER() AS nvarchar(10)));
+END CATCH;
+
+-- Test 46: thất bại do tên không tồn tại (StaffID NULL)
+BEGIN TRY
+    INSERT INTO LoginAttempts (UsernameTried, IsSuccess, FailReason, StaffID)
+    VALUES ('khong_co_ai', 0, 'UnknownUser', NULL);
+    INSERT INTO @KetQua VALUES (46, N'LoginAttempts: thất bại UnknownUser, StaffID NULL', N'OK', N'OK');
+END TRY
+BEGIN CATCH
+    INSERT INTO @KetQua VALUES (46, N'LoginAttempts: thất bại UnknownUser, StaffID NULL', N'OK', N'Lỗi ' + CAST(ERROR_NUMBER() AS nvarchar(10)));
+END CATCH;
+
+-- Test 47: AttemptedAt tự điền giờ hiện tại (DEFAULT getdate())
+BEGIN TRY
+    SET @Time = NULL;
+    SELECT @Time = AttemptedAt FROM LoginAttempts WHERE UsernameTried = 'zz_user';
+    INSERT INTO @KetQua VALUES (47, N'LoginAttempts.AttemptedAt tự điền giờ', N'Giờ hiện tại',
+        CASE WHEN ABS(DATEDIFF(SECOND, @Time, GETDATE())) <= 60 THEN N'Giờ hiện tại' ELSE N'Sai giờ' END);
+END TRY
+BEGIN CATCH
+    INSERT INTO @KetQua VALUES (47, N'LoginAttempts.AttemptedAt tự điền giờ', N'Giờ hiện tại', N'Lỗi ' + CAST(ERROR_NUMBER() AS nvarchar(10)));
+END CATCH;
+
+-- Test 48: thành công mà lại có lý do thất bại phải bị chặn
+BEGIN TRY
+    INSERT INTO LoginAttempts (UsernameTried, IsSuccess, FailReason, StaffID)
+    VALUES ('zz_user', 1, 'WrongPassword', @StaffID);
+    INSERT INTO @KetQua VALUES (48, N'LoginAttempts: IsSuccess = 1 mà có FailReason', N'Lỗi 547', N'Không báo lỗi');
+END TRY
+BEGIN CATCH
+    INSERT INTO @KetQua VALUES (48, N'LoginAttempts: IsSuccess = 1 mà có FailReason', N'Lỗi 547', N'Lỗi ' + CAST(ERROR_NUMBER() AS nvarchar(10)));
+END CATCH;
+
+-- Test 49: thất bại mà thiếu lý do (NULL) phải bị chặn
+BEGIN TRY
+    INSERT INTO LoginAttempts (UsernameTried, IsSuccess, FailReason, StaffID)
+    VALUES ('zz_user', 0, NULL, @StaffID);
+    INSERT INTO @KetQua VALUES (49, N'LoginAttempts: IsSuccess = 0, FailReason NULL', N'Lỗi 547', N'Không báo lỗi');
+END TRY
+BEGIN CATCH
+    INSERT INTO @KetQua VALUES (49, N'LoginAttempts: IsSuccess = 0, FailReason NULL', N'Lỗi 547', N'Lỗi ' + CAST(ERROR_NUMBER() AS nvarchar(10)));
+END CATCH;
+
+-- Test 50: lý do thất bại ngoài danh sách phải bị chặn
+BEGIN TRY
+    INSERT INTO LoginAttempts (UsernameTried, IsSuccess, FailReason, StaffID)
+    VALUES ('zz_user', 0, 'Banned', @StaffID);
+    INSERT INTO @KetQua VALUES (50, N'LoginAttempts: FailReason = Banned', N'Lỗi 547', N'Không báo lỗi');
+END TRY
+BEGIN CATCH
+    INSERT INTO @KetQua VALUES (50, N'LoginAttempts: FailReason = Banned', N'Lỗi 547', N'Lỗi ' + CAST(ERROR_NUMBER() AS nvarchar(10)));
+END CATCH;
+
+-- Test 51: StaffID không tồn tại phải bị chặn (khóa ngoại)
+BEGIN TRY
+    INSERT INTO LoginAttempts (UsernameTried, IsSuccess, FailReason, StaffID)
+    VALUES ('zz_user', 0, 'WrongPassword', -1);
+    INSERT INTO @KetQua VALUES (51, N'LoginAttempts: StaffID không tồn tại', N'Lỗi 547', N'Không báo lỗi');
+END TRY
+BEGIN CATCH
+    INSERT INTO @KetQua VALUES (51, N'LoginAttempts: StaffID không tồn tại', N'Lỗi 547', N'Lỗi ' + CAST(ERROR_NUMBER() AS nvarchar(10)));
+END CATCH;
+
 -- Hủy toàn bộ dữ liệu thử ở trên
 ROLLBACK TRANSACTION;
 
@@ -584,6 +662,7 @@ UNION ALL SELECT N'CustomerContracts', COUNT(*) FROM CustomerContracts
 UNION ALL SELECT N'CustomerSnapshots', COUNT(*) FROM CustomerSnapshots
 UNION ALL SELECT N'Customers',         COUNT(*) FROM Customers
 UNION ALL SELECT N'Interactions',      COUNT(*) FROM Interactions
+UNION ALL SELECT N'LoginAttempts',      COUNT(*) FROM LoginAttempts
 UNION ALL SELECT N'ModelVersions',     COUNT(*) FROM ModelVersions
 UNION ALL SELECT N'RiskConfig',        COUNT(*) FROM RiskConfig
 UNION ALL SELECT N'Role',              COUNT(*) FROM Role
@@ -592,7 +671,7 @@ UNION ALL SELECT N'Tickets',           COUNT(*) FROM Tickets
 UNION ALL SELECT N'TelcoRaw',          @TelcoRaw;
 
 /*--------------------------------------------------------------*/
-/* KẾT QUẢ LƯỚI 1: cột KetLuan phải là ĐẠT ở cả 44 dòng         */
+/* KẾT QUẢ LƯỚI 1: cột KetLuan phải là ĐẠT ở cả 51 dòng         */
 /*--------------------------------------------------------------*/
 SELECT Stt, TenTest, DuKien, ThucTe,
        CASE WHEN DuKien = ThucTe THEN N'ĐẠT' ELSE N'SAI' END AS KetLuan
@@ -601,7 +680,7 @@ ORDER BY Stt;
 
 /*--------------------------------------------------------------*/
 /* KẾT QUẢ LƯỚI 2 (Y-01): số dòng từng bảng trước và sau        */
-/* ROLLBACK phải bằng nhau ở cả 12 dòng (11 bảng + TelcoRaw)    */
+/* ROLLBACK phải bằng nhau ở cả 13 dòng (12 bảng + TelcoRaw)    */
 /*--------------------------------------------------------------*/
 SELECT t.TenBang, t.SoDong AS SoDongTruoc, s.SoDong AS SoDongSau,
        CASE WHEN t.SoDong = s.SoDong THEN N'ĐẠT' ELSE N'SAI' END AS KetLuan

@@ -9,9 +9,9 @@
 /*                                                              */
 /* Cách chạy: mở trong SSMS, chạy SAU 01_schema.sql, TRƯỚC khi  */
 /* nạp dữ liệu. Chạy lại nhiều lần được: có sẵn thì bỏ qua.     */
-/* Kỳ vọng cuối file: tổng số CHECK = 12                        */
+/* Kỳ vọng cuối file: tổng số CHECK = 13                        */
 /*   (6 từ schema.sql: SatisfactionScore, Probability,          */
-/*    Threshold, Status, Priority, Category  + 6 từ file này).  */
+/*    Threshold, Status, Priority, Category  + 7 từ file này).  */
 /*==============================================================*/
 USE CRM_Churn;
 GO
@@ -91,7 +91,22 @@ IF NOT EXISTS (SELECT 1 FROM sys.check_constraints
 GO
 
 /*--------------------------------------------------------------*/
-/* Kiểm: tổng số CHECK phải là 12                               */
+/* LoginAttempts (D-25, Z-12): đăng nhập thành công thì không có */
+/* lý do thất bại; thất bại thì BẮT BUỘC có lý do thuộc danh     */
+/* sách. Có "FailReason IS NOT NULL" để NULL không cho kết quả   */
+/* UNKNOWN rồi lọt qua CHECK (cùng bẫy với ISJSON(NULL) ở Y-05). */
 /*--------------------------------------------------------------*/
-SELECT COUNT(*) AS TongSoCheck, 12 AS DuKien FROM sys.check_constraints;
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints
+               WHERE name = 'CK_LoginAttempts_ThanhCong_LyDoThatBai'
+                 AND parent_object_id = OBJECT_ID('dbo.LoginAttempts'))
+    ALTER TABLE dbo.LoginAttempts ADD CONSTRAINT CK_LoginAttempts_ThanhCong_LyDoThatBai
+        CHECK ((IsSuccess = 1 AND FailReason IS NULL)
+            OR (IsSuccess = 0 AND FailReason IS NOT NULL
+                AND FailReason IN ('UnknownUser','WrongPassword','Inactive','Locked')));
+GO
+
+/*--------------------------------------------------------------*/
+/* Kiểm: tổng số CHECK phải là 13                               */
+/*--------------------------------------------------------------*/
+SELECT COUNT(*) AS TongSoCheck, 13 AS DuKien FROM sys.check_constraints;
 GO
