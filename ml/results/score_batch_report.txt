@@ -5,8 +5,8 @@ Không dùng nhãn Churn và không dùng dữ liệu mô phỏng Interactions/T
 
 Tham số:
   mô hình              = Gradient Boosting v1
-  ModelVersionID       = 6
-  PredictionTime (lô)  = 2026-10-20 12:11:00
+  ModelVersionID       = 1
+  PredictionTime (lô)  = 2026-11-01 13:02:45
   ngưỡng Medium / High = 0.3148 / 0.3866 (đọc từ RiskConfig)
   số khách đã chấm     = 7043
   scikit-learn         = 1.9.0
