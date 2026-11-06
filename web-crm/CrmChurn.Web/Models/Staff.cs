@@ -25,6 +25,8 @@ public partial class Staff
 
     public virtual ICollection<Interaction> Interactions { get; set; } = new List<Interaction>();
 
+    public virtual ICollection<LoginAttempt> LoginAttempts { get; set; } = new List<LoginAttempt>();
+
     public virtual ICollection<RiskConfig> RiskConfigs { get; set; } = new List<RiskConfig>();
 
     public virtual Role Role { get; set; } = null!;

@@ -7,6 +7,10 @@ namespace CrmChurn.Web.Data;
 
 public partial class CrmDbContext : DbContext
 {
+    public CrmDbContext()
+    {
+    }
+
     public CrmDbContext(DbContextOptions<CrmDbContext> options)
         : base(options)
     {
@@ -24,6 +28,8 @@ public partial class CrmDbContext : DbContext
 
     public virtual DbSet<Interaction> Interactions { get; set; }
 
+    public virtual DbSet<LoginAttempt> LoginAttempts { get; set; }
+
     public virtual DbSet<ModelVersion> ModelVersions { get; set; }
 
     public virtual DbSet<RiskConfig> RiskConfigs { get; set; }
@@ -33,6 +39,9 @@ public partial class CrmDbContext : DbContext
     public virtual DbSet<Staff> Staff { get; set; }
 
     public virtual DbSet<Ticket> Tickets { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        => optionsBuilder.UseSqlServer("name=ConnectionStrings:Default");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -278,6 +287,32 @@ public partial class CrmDbContext : DbContext
             entity.HasOne(d => d.Staff).WithMany(p => p.Interactions)
                 .HasForeignKey(d => d.StaffId)
                 .HasConstraintName("FK_INTERACT_PHU_TRACH_STAFF");
+        });
+
+        modelBuilder.Entity<LoginAttempt>(entity =>
+        {
+            entity.HasKey(e => e.AttemptId).HasName("PK_LOGINATTEMPTS");
+
+            entity.HasIndex(e => new { e.UsernameTried, e.AttemptedAt }, "IX_LOGINATTEMPTS_USER_THOIGIAN");
+
+            entity.Property(e => e.AttemptId).HasColumnName("AttemptID");
+            entity.Property(e => e.AttemptedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ClientIp)
+                .HasMaxLength(45)
+                .IsUnicode(false);
+            entity.Property(e => e.FailReason)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.StaffId).HasColumnName("StaffID");
+            entity.Property(e => e.UsernameTried)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.Staff).WithMany(p => p.LoginAttempts)
+                .HasForeignKey(d => d.StaffId)
+                .HasConstraintName("FK_LOGINATT_THU_DANG__STAFF");
         });
 
         modelBuilder.Entity<ModelVersion>(entity =>
