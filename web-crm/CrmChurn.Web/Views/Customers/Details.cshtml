@@ -1,0 +1,230 @@
+﻿@model CustomerDetailViewModel
+@{
+    ViewData["Title"] = "Khách hàng " + Model.Customer.CustomerId;
+    var khach = Model.Customer;
+    var hd = Model.HopDong;
+
+    // Các dòng dịch vụ để hiện thành bảng hai cột
+    var dichVu = new List<(string Nhan, string GiaTri)>();
+    if (hd != null)
+    {
+        dichVu.Add(("Hợp đồng", hd.Contract));
+        dichVu.Add(("Phương thức thanh toán", hd.PaymentMethod));
+        dichVu.Add(("Hóa đơn điện tử", hd.PaperlessBilling));
+        dichVu.Add(("Dịch vụ điện thoại", hd.PhoneService));
+        dichVu.Add(("Nhiều đường dây", hd.MultipleLines));
+        dichVu.Add(("Internet", hd.InternetService));
+        dichVu.Add(("Bảo mật trực tuyến", hd.OnlineSecurity));
+        dichVu.Add(("Sao lưu trực tuyến", hd.OnlineBackup));
+        dichVu.Add(("Bảo vệ thiết bị", hd.DeviceProtection));
+        dichVu.Add(("Hỗ trợ kỹ thuật", hd.TechSupport));
+        dichVu.Add(("Truyền hình trực tuyến", hd.StreamingTv));
+        dichVu.Add(("Phim trực tuyến", hd.StreamingMovies));
+    }
+}
+
+@if (TempData["ThanhCong"] is string thanhCong)
+{
+    <div class="alert alert-success">@thanhCong</div>
+}
+@if (TempData["ThongBao"] is string thongBao)
+{
+    <div class="alert alert-warning">@thongBao</div>
+}
+
+@{
+    // Chỉ Manager và Admin thấy các nút sửa (quyền thật vẫn chặn ở Controller)
+    bool coQuyenSua = User.IsInRole("Manager") || User.IsInRole("Admin");
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">
+        Khách hàng @khach.CustomerId
+        @if (khach.CustomerStatus == "Inactive")
+        {
+            <span class="badge bg-secondary fs-6">Ngừng theo dõi</span>
+        }
+    </h2>
+    <div class="d-flex gap-2">
+        @if (coQuyenSua)
+        {
+            <a asp-action="Edit" asp-route-id="@khach.CustomerId" class="btn btn-outline-primary">Sửa hồ sơ</a>
+            if (khach.CustomerStatus != "Inactive")
+            {
+                <a asp-action="Deactivate" asp-route-id="@khach.CustomerId" class="btn btn-outline-danger">Ngừng theo dõi</a>
+            }
+        }
+        <a asp-action="Index" class="btn btn-outline-secondary">Về danh sách</a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Hồ sơ</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Giới tính</dt>
+                    <dd class="col-sm-7">@(khach.Gender ?? "—")</dd>
+                    <dt class="col-sm-5">Người cao tuổi</dt>
+                    <dd class="col-sm-7">@HienThi.CoKhong(khach.SeniorCitizen)</dd>
+                    <dt class="col-sm-5">Có bạn đời</dt>
+                    <dd class="col-sm-7">@HienThi.CoKhong(khach.Partner)</dd>
+                    <dt class="col-sm-5">Có người phụ thuộc</dt>
+                    <dd class="col-sm-7">@HienThi.CoKhong(khach.Dependents)</dd>
+                    <dt class="col-sm-5">Số tháng sử dụng (tenure)</dt>
+                    <dd class="col-sm-7">@(Model.Tenure?.ToString() ?? "—") (@NhomTenure.Nhan(Model.Tenure))</dd>
+                    <dt class="col-sm-5">Ngày tham gia ước lượng</dt>
+                    <dd class="col-sm-7">@HienThi.Ngay(khach.EstimatedJoinDate)</dd>
+                    <dt class="col-sm-5">Trạng thái CRM</dt>
+                    <dd class="col-sm-7">@khach.CustomerStatus</dd>
+                </dl>
+                <p class="text-muted small mt-2 mb-0">
+                    Dữ liệu mẫu IBM Telco. Ngày tham gia chỉ là ngày ước lượng từ tenure.
+                    Trạng thái CRM do script nạp gán mặc định, không phản ánh khách còn hoạt động.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Dự báo churn gần nhất</div>
+            <div class="card-body">
+                @if (Model.DuBaoGanNhat == null)
+                {
+                    <p class="mb-0">Chưa có dự báo.</p>
+                }
+                else
+                {
+                    var db = Model.DuBaoGanNhat;
+                    <p class="mb-1">
+                        Mức rủi ro:
+                        <span class="badge @HienThi.LopRuiRo(db.RiskLevel)">@HienThi.NhanRuiRo(db.RiskLevel)</span>
+                    </p>
+                    <p class="mb-1">Xác suất churn: <strong>@db.Probability.ToString("0.0000")</strong></p>
+                    <p class="mb-1">Mô hình: @db.ModelName (@db.ModelVersion)</p>
+                    <p class="mb-1">Thời điểm dự báo: @HienThi.Ngay(db.PredictionTime)</p>
+                }
+                <p class="text-muted small mt-2 mb-0">
+                    Điểm dự báo chỉ hỗ trợ nhân viên chăm sóc, không phải nguyên nhân khiến khách rời bỏ.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">Hợp đồng và dịch vụ đang hiệu lực</div>
+            <div class="card-body">
+                @if (hd == null)
+                {
+                    <div class="alert alert-danger mb-0">
+                        Dữ liệu lỗi: khách này có @Model.SoDongHopDongHieuLuc dòng hợp đồng đang hiệu lực (phải đúng 1).
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        @foreach (var d in dichVu)
+                        {
+                            <div class="col-md-6">
+                                <dl class="row mb-1">
+                                    <dt class="col-sm-6">@d.Nhan</dt>
+                                    <dd class="col-sm-6">@d.GiaTri</dd>
+                                </dl>
+                            </div>
+                        }
+                    </div>
+                    <p class="mb-0">
+                        Mức phí hằng tháng (dữ liệu mẫu): <strong>@hd.MonthlyCharges.ToString("0.00")</strong>.
+                        Hiệu lực từ @HienThi.Ngay(hd.EffectiveFrom).
+                    </p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">Tương tác gần nhất (@Model.TuongTac.Count / @Model.TongTuongTac)</div>
+            <div class="card-body">
+                @if (Model.TuongTac.Count == 0)
+                {
+                    <p class="mb-0">Chưa có tương tác.</p>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr><th>Thời điểm</th><th>Kênh</th><th>Loại</th><th>Mô tả</th><th>Kết quả</th><th>Phụ trách</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var t in Model.TuongTac)
+                                {
+                                    <tr>
+                                        <td>@HienThi.Ngay(t.InteractionDate)</td>
+                                        <td>@t.Channel</td>
+                                        <td>@t.InteractionType</td>
+                                        <td>
+                                            @t.Description
+                                            @if (t.IsSimulated)
+                                            {
+                                                <span class="badge bg-secondary">dữ liệu mô phỏng</span>
+                                            }
+                                        </td>
+                                        <td>@(t.Result ?? "—")</td>
+                                        <td>@(t.StaffName ?? "—")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">Ticket gần nhất (@Model.Tickets.Count / @Model.TongTicket)</div>
+            <div class="card-body">
+                @if (Model.Tickets.Count == 0)
+                {
+                    <p class="mb-0">Chưa có ticket.</p>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr><th>Mã</th><th>Tạo lúc</th><th>Loại</th><th>Ưu tiên</th><th>Trạng thái</th><th>Đóng lúc</th><th>Hài lòng</th><th>Phụ trách</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var t in Model.Tickets)
+                                {
+                                    <tr>
+                                        <td>
+                                            @t.TicketId
+                                            @if (t.IsSimulated)
+                                            {
+                                                <span class="badge bg-secondary">dữ liệu mô phỏng</span>
+                                            }
+                                        </td>
+                                        <td>@HienThi.Ngay(t.CreatedAt)</td>
+                                        <td>@t.Category</td>
+                                        <td>@t.Priority</td>
+                                        <td>@t.Status</td>
+                                        <td>@HienThi.Ngay(t.ClosedAt)</td>
+                                        <td>@(t.SatisfactionScore?.ToString() ?? "—")</td>
+                                        <td>@(t.AssignedName ?? "—")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

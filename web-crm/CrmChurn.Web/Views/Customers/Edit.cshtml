@@ -1,0 +1,48 @@
+﻿@model CustomerEditViewModel
+@{
+    string maKhach = ViewData["CustomerId"] as string ?? "";
+    ViewData["Title"] = "Sửa hồ sơ " + maKhach;
+}
+
+<h2 class="mb-3">Sửa hồ sơ khách @maKhach</h2>
+
+<form asp-action="Edit" asp-route-id="@maKhach" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label">Mã khách</label>
+            <input class="form-control" value="@maKhach" disabled />
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Gender" class="form-label">Giới tính</label>
+            <select asp-for="Gender" asp-items="@(new SelectList(DanhMucTelco.GioiTinh))" class="form-select">
+                <option value="">-- Chọn --</option>
+            </select>
+            <span asp-validation-for="Gender" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 d-flex flex-column justify-content-end">
+            <div class="form-check">
+                <input asp-for="SeniorCitizen" class="form-check-input" />
+                <label asp-for="SeniorCitizen" class="form-check-label">Người cao tuổi</label>
+            </div>
+            <div class="form-check">
+                <input asp-for="Partner" class="form-check-input" />
+                <label asp-for="Partner" class="form-check-label">Có bạn đời</label>
+            </div>
+            <div class="form-check">
+                <input asp-for="Dependents" class="form-check-input" />
+                <label asp-for="Dependents" class="form-check-label">Có người phụ thuộc</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a asp-action="Details" asp-route-id="@maKhach" class="btn btn-outline-secondary">Hủy</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,148 @@
+﻿@model CustomerCreateViewModel
+@{
+    ViewData["Title"] = "Thêm khách hàng";
+}
+
+<h2 class="mb-1">Thêm khách hàng</h2>
+<p class="text-muted small">
+    Khách thêm ở đây là dữ liệu nghiệp vụ, không thuộc bộ dữ liệu mẫu IBM. Khách mới chưa có số tháng sử dụng
+    và tổng phí (snapshot), nên chưa dự báo từ CSDL được.
+</p>
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+    <h5 class="mt-3">Hồ sơ</h5>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label asp-for="CustomerId" class="form-label">Mã khách</label>
+            <input asp-for="CustomerId" class="form-control" maxlength="20" />
+            <span asp-validation-for="CustomerId" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Gender" class="form-label">Giới tính</label>
+            <select asp-for="Gender" asp-items="@(new SelectList(DanhMucTelco.GioiTinh))" class="form-select">
+                <option value="">-- Chọn --</option>
+            </select>
+            <span asp-validation-for="Gender" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 d-flex flex-column justify-content-end">
+            <div class="form-check">
+                <input asp-for="SeniorCitizen" class="form-check-input" />
+                <label asp-for="SeniorCitizen" class="form-check-label">Người cao tuổi</label>
+            </div>
+            <div class="form-check">
+                <input asp-for="Partner" class="form-check-input" />
+                <label asp-for="Partner" class="form-check-label">Có bạn đời</label>
+            </div>
+            <div class="form-check">
+                <input asp-for="Dependents" class="form-check-input" />
+                <label asp-for="Dependents" class="form-check-label">Có người phụ thuộc</label>
+            </div>
+        </div>
+    </div>
+
+    <h5 class="mt-4">Hợp đồng và dịch vụ ban đầu</h5>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label asp-for="Contract" class="form-label">Hợp đồng</label>
+            <select asp-for="Contract" asp-items="@(new SelectList(DanhMucTelco.HopDong))" class="form-select">
+                <option value="">-- Chọn --</option>
+            </select>
+            <span asp-validation-for="Contract" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="PaymentMethod" class="form-label">Phương thức thanh toán</label>
+            <select asp-for="PaymentMethod" asp-items="@(new SelectList(DanhMucTelco.ThanhToan))" class="form-select">
+                <option value="">-- Chọn --</option>
+            </select>
+            <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="PaperlessBilling" class="form-label">Hóa đơn điện tử</label>
+            <select asp-for="PaperlessBilling" asp-items="@(new SelectList(DanhMucTelco.YesNo))" class="form-select">
+                <option value="">-- Chọn --</option>
+            </select>
+            <span asp-validation-for="PaperlessBilling" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label asp-for="PhoneService" class="form-label">Dịch vụ điện thoại</label>
+            <select asp-for="PhoneService" asp-items="@(new SelectList(DanhMucTelco.YesNo))" class="form-select">
+                <option value="">-- Chọn --</option>
+            </select>
+            <span asp-validation-for="PhoneService" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="MultipleLines" class="form-label">Nhiều đường dây</label>
+            <select asp-for="MultipleLines" asp-items="@(new SelectList(DanhMucTelco.NhieuDuongDay))" class="form-select">
+                <option value="">-- Chọn --</option>
+            </select>
+            <span asp-validation-for="MultipleLines" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="InternetService" class="form-label">Internet</label>
+            <select asp-for="InternetService" asp-items="@(new SelectList(DanhMucTelco.Internet))" class="form-select">
+                <option value="">-- Chọn --</option>
+            </select>
+            <span asp-validation-for="InternetService" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label asp-for="OnlineSecurity" class="form-label">Bảo mật trực tuyến</label>
+            <select asp-for="OnlineSecurity" asp-items="@(new SelectList(DanhMucTelco.DichVuInternet))" class="form-select">
+                <option value="">-- Chọn --</option>
+            </select>
+            <span asp-validation-for="OnlineSecurity" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="OnlineBackup" class="form-label">Sao lưu trực tuyến</label>
+            <select asp-for="OnlineBackup" asp-items="@(new SelectList(DanhMucTelco.DichVuInternet))" class="form-select">
+                <option value="">-- Chọn --</option>
+            </select>
+            <span asp-validation-for="OnlineBackup" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="DeviceProtection" class="form-label">Bảo vệ thiết bị</label>
+            <select asp-for="DeviceProtection" asp-items="@(new SelectList(DanhMucTelco.DichVuInternet))" class="form-select">
+                <option value="">-- Chọn --</option>
+            </select>
+            <span asp-validation-for="DeviceProtection" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="TechSupport" class="form-label">Hỗ trợ kỹ thuật</label>
+            <select asp-for="TechSupport" asp-items="@(new SelectList(DanhMucTelco.DichVuInternet))" class="form-select">
+                <option value="">-- Chọn --</option>
+            </select>
+            <span asp-validation-for="TechSupport" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="StreamingTv" class="form-label">Truyền hình trực tuyến</label>
+            <select asp-for="StreamingTv" asp-items="@(new SelectList(DanhMucTelco.DichVuInternet))" class="form-select">
+                <option value="">-- Chọn --</option>
+            </select>
+            <span asp-validation-for="StreamingTv" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="StreamingMovies" class="form-label">Phim trực tuyến</label>
+            <select asp-for="StreamingMovies" asp-items="@(new SelectList(DanhMucTelco.DichVuInternet))" class="form-select">
+                <option value="">-- Chọn --</option>
+            </select>
+            <span asp-validation-for="StreamingMovies" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label asp-for="MonthlyChargesText" class="form-label">Mức phí hằng tháng</label>
+            <input asp-for="MonthlyChargesText" class="form-control" placeholder="Ví dụ 29,85" autocomplete="off" />
+            <span asp-validation-for="MonthlyChargesText" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Hủy</a>
+    </div>
+</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

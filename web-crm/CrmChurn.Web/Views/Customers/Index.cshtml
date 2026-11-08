@@ -1,0 +1,130 @@
+﻿@model CustomerListViewModel
+@{
+    ViewData["Title"] = "Khách hàng";
+}
+
+<div class="d-flex justify-content-between align-items-center">
+    <h2 class="mb-1">Khách hàng</h2>
+    @if (User.IsInRole("Manager") || User.IsInRole("Admin"))
+    {
+        <a asp-action="Create" class="btn btn-primary">Thêm khách</a>
+    }
+</div>
+<p class="text-muted small">
+    Hồ sơ lấy từ bộ dữ liệu mẫu IBM Telco. "Trạng thái CRM" do script nạp gán mặc định, không phải nhãn churn.
+    Mức rủi ro là điểm của dự báo gần nhất, chỉ hỗ trợ nhân viên chăm sóc, không phải nguyên nhân khiến khách rời bỏ.
+</p>
+
+@if (TempData["ThanhCong"] is string thanhCong)
+{
+    <div class="alert alert-success">@thanhCong</div>
+}
+@if (TempData["ThongBao"] is string thongBao)
+{
+    <div class="alert alert-warning">@thongBao</div>
+}
+
+<form method="get" asp-action="Index" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <input type="text" name="q" value="@Model.Q" class="form-control" placeholder="Tìm theo mã khách" />
+    </div>
+    <div class="col-md-2">
+        <select name="contract" class="form-select">
+            <option value="">Mọi hợp đồng</option>
+            @foreach (var h in CustomerListViewModel.CacHopDong)
+            {
+                <option value="@h" selected="@(Model.Contract == h)">@h</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select name="tenureGroup" class="form-select">
+            <option value="">Mọi nhóm tenure</option>
+            @foreach (var n in NhomTenure.DanhSach)
+            {
+                <option value="@n.Khoa" selected="@(Model.TenureGroup == n.Khoa)">@n.Nhan</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select name="risk" class="form-select">
+            <option value="">Mọi mức rủi ro</option>
+            @foreach (var r in CustomerListViewModel.CacMucRuiRo)
+            {
+                <option value="@r" selected="@(Model.Risk == r)">@HienThi.NhanRuiRo(r)</option>
+            }
+            <option value="None" selected="@(Model.Risk == "None")">Chưa có dự báo</option>
+        </select>
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Lọc</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Xóa lọc</a>
+    </div>
+</form>
+
+<p class="mb-2">
+    Tìm thấy <strong>@Model.TongSoKhach.ToString("N0")</strong> khách, trang @Model.Page / @Model.TongTrang.
+</p>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="alert alert-info">Không tìm thấy khách nào phù hợp với bộ lọc.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Mã khách</th>
+                    <th>Hợp đồng đang hiệu lực</th>
+                    <th>Nhóm tenure</th>
+                    <th>Mức rủi ro</th>
+                    <th>Trạng thái CRM</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var k in Model.Items)
+                {
+                    <tr>
+                        <td>@k.CustomerId</td>
+                        <td>@(k.Contract ?? "—")</td>
+                        <td>@NhomTenure.Nhan(k.Tenure)</td>
+                        <td><span class="badge @HienThi.LopRuiRo(k.RiskLevel)">@HienThi.NhanRuiRo(k.RiskLevel)</span></td>
+                        <td>@k.CustomerStatus</td>
+                        <td><a asp-action="Details" asp-route-id="@k.CustomerId" class="btn btn-sm btn-outline-primary">Xem</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.TongTrang > 1)
+    {
+        int tu = Math.Max(1, Model.Page - 2);
+        int den = Math.Min(Model.TongTrang, Model.Page + 2);
+        <nav>
+            <ul class="pagination">
+                <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-q="@Model.Q" asp-route-contract="@Model.Contract"
+                       asp-route-tenureGroup="@Model.TenureGroup" asp-route-risk="@Model.Risk"
+                       asp-route-page="@(Model.Page - 1)">Trước</a>
+                </li>
+                @for (int p = tu; p <= den; p++)
+                {
+                    <li class="page-item @(p == Model.Page ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-q="@Model.Q" asp-route-contract="@Model.Contract"
+                           asp-route-tenureGroup="@Model.TenureGroup" asp-route-risk="@Model.Risk"
+                           asp-route-page="@p">@p</a>
+                    </li>
+                }
+                <li class="page-item @(Model.Page == Model.TongTrang ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-q="@Model.Q" asp-route-contract="@Model.Contract"
+                       asp-route-tenureGroup="@Model.TenureGroup" asp-route-risk="@Model.Risk"
+                       asp-route-page="@(Model.Page + 1)">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    }
+}

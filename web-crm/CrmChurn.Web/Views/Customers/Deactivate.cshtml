@@ -1,0 +1,16 @@
+﻿@model Customer
+@{
+    ViewData["Title"] = "Ngừng theo dõi " + Model.CustomerId;
+}
+
+<h2 class="mb-3">Ngừng theo dõi khách @Model.CustomerId</h2>
+
+<div class="alert alert-warning">
+    Khách này sẽ được đánh dấu <strong>Ngừng theo dõi</strong>. Hồ sơ, hợp đồng, tương tác, ticket và dự báo
+    <strong>vẫn được giữ</strong> trong hệ thống. Thao tác này được ghi vào nhật ký.
+</div>
+
+<form asp-action="Deactivate" asp-route-id="@Model.CustomerId" method="post" class="d-flex gap-2">
+    <button type="submit" class="btn btn-danger">Xác nhận ngừng theo dõi</button>
+    <a asp-action="Details" asp-route-id="@Model.CustomerId" class="btn btn-outline-secondary">Hủy</a>
+</form>
