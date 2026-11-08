@@ -24,3 +24,9 @@ appsettings.Development.json
 delivery/
 *.bacpac
 *.user
+
+# File sao lưu tự sinh của PowerDesigner
+*.bpb
+*.cdb
+*.pdb
+*.oob
