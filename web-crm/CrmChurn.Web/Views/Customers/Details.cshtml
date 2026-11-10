@@ -48,6 +48,10 @@
         @if (coQuyenSua)
         {
             <a asp-action="Edit" asp-route-id="@khach.CustomerId" class="btn btn-outline-primary">Sửa hồ sơ</a>
+            if (hd != null)
+            {
+                <a asp-action="ChangeContract" asp-route-id="@khach.CustomerId" class="btn btn-outline-primary">Đổi hợp đồng</a>
+            }
             if (khach.CustomerStatus != "Inactive")
             {
                 <a asp-action="Deactivate" asp-route-id="@khach.CustomerId" class="btn btn-outline-danger">Ngừng theo dõi</a>
