@@ -1,0 +1,84 @@
+﻿@model CsvImportPageViewModel
+@{
+    ViewData["Title"] = "Nhập khách hàng từ CSV";
+}
+
+<h2 class="mb-1">Nhập khách hàng từ tệp CSV</h2>
+<p class="text-muted small">
+    Mỗi dòng hợp lệ tạo một khách mới kèm hợp đồng ban đầu. Khách nhập qua CSV là dữ liệu nghiệp vụ, không thuộc bộ dữ liệu mẫu IBM,
+    và chưa có snapshot nên chưa dự báo từ CSDL được (chỉ qua nhập thủ công).
+</p>
+
+@if (!string.IsNullOrEmpty(Model.ThongBaoLoi))
+{
+    <div class="alert alert-danger">@Model.ThongBaoLoi</div>
+}
+
+<div class="card mb-3">
+    <div class="card-header">Quy định của tệp</div>
+    <div class="card-body">
+        <ul class="mb-2">
+            <li>Tệp .csv, UTF-8, tối đa @(CsvImportConfig.MaxBytes / 1024) KB và @CsvImportConfig.MaxRows.ToString("N0") dòng dữ liệu mỗi lần.</li>
+            <li>Dòng đầu là tiêu đề, đúng @CsvImportConfig.CacCot.Length cột như tệp mẫu. Tệp dùng dấu phẩy hoặc chấm phẩy đều được.</li>
+            <li>Nếu tệp dùng dấu phẩy thì mức phí viết <code>29.85</code>; mức phí kiểu <code>29,85</code> phải đặt trong ngoặc kép.</li>
+            <li><strong>Xóa dòng mẫu (MAU-0001)</strong> trong tệp mẫu trước khi nhập, nếu không dòng đó cũng được nhập.</li>
+        </ul>
+        <div class="small">
+            <div><strong>CustomerID</strong>: tối đa 20 ký tự, chỉ chữ, số, gạch ngang.</div>
+            <div><strong>Gender</strong>: @string.Join(", ", DanhMucTelco.GioiTinh) | <strong>SeniorCitizen</strong>: 0 hoặc 1 | <strong>Partner, Dependents, PhoneService, PaperlessBilling</strong>: Yes hoặc No</div>
+            <div><strong>MultipleLines</strong>: @string.Join(", ", DanhMucTelco.NhieuDuongDay) | <strong>InternetService</strong>: @string.Join(", ", DanhMucTelco.Internet)</div>
+            <div><strong>OnlineSecurity, OnlineBackup, DeviceProtection, TechSupport, StreamingTV, StreamingMovies</strong>: @string.Join(", ", DanhMucTelco.DichVuInternet)</div>
+            <div><strong>Contract</strong>: @string.Join(", ", DanhMucTelco.HopDong)</div>
+            <div><strong>PaymentMethod</strong>: @string.Join(", ", DanhMucTelco.ThanhToan)</div>
+            <div class="mt-1">Không dùng điện thoại thì MultipleLines = "No phone service"; không dùng internet thì 6 cột dịch vụ internet = "No internet service" (và ngược lại).</div>
+        </div>
+    </div>
+</div>
+
+<form asp-action="Import" method="post" enctype="multipart/form-data" class="mb-4">
+    <div class="mb-3">
+        <label for="tep" class="form-label">Chọn tệp CSV</label>
+        <input type="file" id="tep" name="tep" accept=".csv" class="form-control" />
+    </div>
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Nhập</button>
+        <a asp-action="ImportTemplate" class="btn btn-outline-primary">Tải tệp mẫu</a>
+        <a asp-action="Index" class="btn btn-outline-secondary">Về danh sách</a>
+    </div>
+</form>
+
+@if (Model.KetQua != null)
+{
+    var kq = Model.KetQua;
+    <div class="alert @(kq.SoThatBai == 0 && kq.ChuaXuLy == 0 ? "alert-success" : "alert-warning")">
+        <strong>@kq.ThanhCong thành công, @kq.SoThatBai thất bại.</strong>
+        Tổng @kq.TongDong dòng dữ liệu trong tệp.
+        @if (kq.ChuaXuLy > 0)
+        {
+            <div>@kq.ChuaXuLy dòng chưa được xử lý vì phải dừng giữa chừng.</div>
+        }
+    </div>
+
+    if (kq.Loi.Count > 0)
+    {
+        <h5>Các dòng bị từ chối</h5>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr><th>Dòng</th><th>Mã khách</th><th>Lý do</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var l in kq.Loi)
+                    {
+                        <tr>
+                            <td>@l.Dong</td>
+                            <td>@(string.IsNullOrEmpty(l.CustomerId) ? "—" : l.CustomerId)</td>
+                            <td>@l.LyDo</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <p class="text-muted small">Số dòng tính theo tệp, dòng tiêu đề là dòng 1.</p>
+    }
+}
