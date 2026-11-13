@@ -1,0 +1,155 @@
+﻿@model InteractionListViewModel
+@{
+    ViewData["Title"] = "Tương tác";
+    // Nút theo vai trò chỉ để tiện; quyền thật chặn ở Controller (R-11)
+    bool coQuyenSua = User.IsInRole("Manager") || User.IsInRole("Admin");
+    bool laAdmin = User.IsInRole("Admin");
+    string? tuNgayText = Model.TuNgay?.ToString("yyyy-MM-dd");
+    string? denNgayText = Model.DenNgay?.ToString("yyyy-MM-dd");
+}
+
+<div class="d-flex justify-content-between align-items-center">
+    <h2 class="mb-1">Tương tác</h2>
+    <a asp-action="Create" asp-route-customerId="@Model.CustomerId" class="btn btn-primary">Ghi nhận tương tác</a>
+</div>
+<p class="text-muted small">
+    Dòng có nhãn "dữ liệu mô phỏng" là dữ liệu sinh bằng script để demo, không phải lịch sử thật.
+</p>
+
+@if (TempData["ThanhCong"] is string thanhCong)
+{
+    <div class="alert alert-success">@thanhCong</div>
+}
+@if (TempData["ThongBao"] is string thongBao)
+{
+    <div class="alert alert-warning">@thongBao</div>
+}
+@if (!string.IsNullOrEmpty(Model.ThongBaoLoc))
+{
+    <div class="alert alert-warning">@Model.ThongBaoLoc</div>
+}
+
+<form method="get" asp-action="Index" class="row g-2 mb-3">
+    <div class="col-md-2">
+        <input type="text" name="customerId" value="@Model.CustomerId" class="form-control" placeholder="Mã khách" />
+    </div>
+    <div class="col-md-2">
+        <select name="type" class="form-select">
+            <option value="">Mọi loại</option>
+            @foreach (var l in DanhMucTuongTac.Loai)
+            {
+                <option value="@l" selected="@(Model.Type == l)">@l</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select name="channel" class="form-select">
+            <option value="">Mọi kênh</option>
+            @foreach (var k in DanhMucTuongTac.Kenh)
+            {
+                <option value="@k" selected="@(Model.Channel == k)">@k</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <input type="date" name="tuNgay" value="@tuNgayText" class="form-control" title="Từ ngày" />
+    </div>
+    <div class="col-md-2">
+        <input type="date" name="denNgay" value="@denNgayText" class="form-control" title="Đến ngày" />
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Lọc</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Xóa lọc</a>
+    </div>
+</form>
+
+<p class="mb-2">
+    Tìm thấy <strong>@Model.TongSoDong.ToString("N0")</strong> tương tác, trang @Model.Page / @Model.TongTrang.
+</p>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="alert alert-info">Không có tương tác.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Thời điểm</th>
+                    <th>Khách</th>
+                    <th>Kênh</th>
+                    <th>Loại</th>
+                    <th>Mô tả</th>
+                    <th>Kết quả</th>
+                    <th>Phụ trách</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in Model.Items)
+                {
+                    <tr>
+                        <td class="text-nowrap">@HienThi.Ngay(t.InteractionDate)</td>
+                        <td class="text-nowrap">
+                            <a asp-controller="Customers" asp-action="Details" asp-route-id="@t.CustomerId">@t.CustomerId</a>
+                        </td>
+                        <td>@t.Channel</td>
+                        <td>@t.InteractionType</td>
+                        <td>
+                            @t.Description
+                            @if (t.IsSimulated)
+                            {
+                                <span class="badge bg-secondary">dữ liệu mô phỏng</span>
+                            }
+                        </td>
+                        <td>@(t.Result ?? "—")</td>
+                        <td>@(t.StaffName ?? "—")</td>
+                        <td class="text-nowrap">
+                            @if (coQuyenSua)
+                            {
+                                <a asp-action="Edit" asp-route-id="@t.InteractionId" class="btn btn-sm btn-outline-primary">Sửa</a>
+                            }
+                            @if (laAdmin)
+                            {
+                                <a asp-action="Delete" asp-route-id="@t.InteractionId" class="btn btn-sm btn-outline-danger">Xóa</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.TongTrang > 1)
+    {
+        int tu = Math.Max(1, Model.Page - 2);
+        int den = Math.Min(Model.TongTrang, Model.Page + 2);
+        <nav>
+            <ul class="pagination">
+                <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-customerId="@Model.CustomerId"
+                       asp-route-type="@Model.Type" asp-route-channel="@Model.Channel"
+                       asp-route-tuNgay="@tuNgayText" asp-route-denNgay="@denNgayText"
+                       asp-route-page="@(Model.Page - 1)">Trước</a>
+                </li>
+                @for (int p = tu; p <= den; p++)
+                {
+                    <li class="page-item @(p == Model.Page ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-customerId="@Model.CustomerId"
+                           asp-route-type="@Model.Type" asp-route-channel="@Model.Channel"
+                           asp-route-tuNgay="@tuNgayText" asp-route-denNgay="@denNgayText"
+                           asp-route-page="@p">@p</a>
+                    </li>
+                }
+                <li class="page-item @(Model.Page == Model.TongTrang ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-customerId="@Model.CustomerId"
+                       asp-route-type="@Model.Type" asp-route-channel="@Model.Channel"
+                       asp-route-tuNgay="@tuNgayText" asp-route-denNgay="@denNgayText"
+                       asp-route-page="@(Model.Page + 1)">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    }
+}

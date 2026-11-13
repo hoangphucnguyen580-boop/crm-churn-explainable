@@ -1,0 +1,71 @@
+﻿@model InteractionFormModel
+@{
+    string maKhach = ViewData["CustomerId"] as string ?? "";
+    long maTuongTac = ViewData["InteractionId"] is long l ? l : 0;
+    bool moPhong = ViewData["IsSimulated"] is bool b && b;
+    ViewData["Title"] = "Sửa tương tác";
+}
+
+<h2 class="mb-1">Sửa tương tác của khách @maKhach</h2>
+@if (moPhong)
+{
+    <p class="text-muted small">
+        <span class="badge bg-secondary">dữ liệu mô phỏng</span>
+        Dòng này là dữ liệu mô phỏng; nhãn này giữ nguyên sau khi sửa.
+    </p>
+}
+
+<form asp-action="Edit" asp-route-id="@maTuongTac" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label">Mã khách</label>
+            <input class="form-control" value="@maKhach" disabled />
+        </div>
+        <div class="col-md-4">
+            <label for="InteractionDate" class="form-label">Thời điểm</label>
+            <input type="datetime-local" id="InteractionDate" name="InteractionDate" class="form-control"
+                   value="@(Model.InteractionDate?.ToString("yyyy-MM-dd'T'HH:mm", System.Globalization.CultureInfo.InvariantCulture))" />
+            <span asp-validation-for="InteractionDate" class="text-danger"></span>
+        </div>
+        <div class="col-md-4"></div>
+
+        <div class="col-md-4">
+            <label asp-for="Channel" class="form-label">Kênh</label>
+            <select asp-for="Channel" asp-items="@(new SelectList(DanhMucTuongTac.Kenh))" class="form-select">
+                <option value="">-- Chọn --</option>
+            </select>
+            <span asp-validation-for="Channel" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="InteractionType" class="form-label">Loại</label>
+            <select asp-for="InteractionType" asp-items="@(new SelectList(DanhMucTuongTac.Loai))" class="form-select">
+                <option value="">-- Chọn --</option>
+            </select>
+            <span asp-validation-for="InteractionType" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Result" class="form-label">Kết quả</label>
+            <select asp-for="Result" asp-items="@(new SelectList(DanhMucTuongTac.KetQua))" class="form-select">
+                <option value="">-- Chưa có --</option>
+            </select>
+            <span asp-validation-for="Result" class="text-danger"></span>
+        </div>
+
+        <div class="col-12">
+            <label asp-for="Description" class="form-label">Mô tả</label>
+            <textarea asp-for="Description" class="form-control" rows="4" maxlength="1000"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a asp-action="Index" asp-route-customerId="@maKhach" class="btn btn-outline-secondary">Hủy</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

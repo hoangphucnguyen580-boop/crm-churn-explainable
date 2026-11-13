@@ -1,0 +1,36 @@
+﻿@model InteractionListItem
+@{
+    ViewData["Title"] = "Xóa tương tác";
+}
+
+<h2 class="mb-3">Xóa tương tác của khách @Model.CustomerId</h2>
+
+<div class="alert alert-warning">
+    Tương tác này sẽ bị <strong>xóa hẳn</strong>. Giá trị cũ được lưu trong nhật ký thao tác.
+</div>
+
+<dl class="row">
+    <dt class="col-sm-2">Thời điểm</dt>
+    <dd class="col-sm-10">@HienThi.Ngay(Model.InteractionDate)</dd>
+    <dt class="col-sm-2">Kênh</dt>
+    <dd class="col-sm-10">@Model.Channel</dd>
+    <dt class="col-sm-2">Loại</dt>
+    <dd class="col-sm-10">@Model.InteractionType</dd>
+    <dt class="col-sm-2">Mô tả</dt>
+    <dd class="col-sm-10">
+        @(Model.Description ?? "—")
+        @if (Model.IsSimulated)
+        {
+            <span class="badge bg-secondary">dữ liệu mô phỏng</span>
+        }
+    </dd>
+    <dt class="col-sm-2">Kết quả</dt>
+    <dd class="col-sm-10">@(Model.Result ?? "—")</dd>
+    <dt class="col-sm-2">Phụ trách</dt>
+    <dd class="col-sm-10">@(Model.StaffName ?? "—")</dd>
+</dl>
+
+<form asp-action="Delete" asp-route-id="@Model.InteractionId" method="post" class="d-flex gap-2">
+    <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
+    <a asp-action="Index" asp-route-customerId="@Model.CustomerId" class="btn btn-outline-secondary">Hủy</a>
+</form>
