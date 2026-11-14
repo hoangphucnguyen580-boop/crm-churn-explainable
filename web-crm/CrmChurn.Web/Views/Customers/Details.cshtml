@@ -199,7 +199,15 @@
 
     <div class="col-12">
         <div class="card">
-            <div class="card-header">Ticket gần nhất (@Model.Tickets.Count / @Model.TongTicket)</div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Ticket gần nhất (@Model.Tickets.Count / @Model.TongTicket)</span>
+                <span class="d-flex gap-2">
+                    <a asp-controller="Tickets" asp-action="Index" asp-route-customerId="@khach.CustomerId"
+                       class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+                    <a asp-controller="Tickets" asp-action="Create" asp-route-customerId="@khach.CustomerId"
+                       class="btn btn-sm btn-primary">Mở ticket</a>
+                </span>
+            </div>
             <div class="card-body">
                 @if (Model.Tickets.Count == 0)
                 {
@@ -217,7 +225,10 @@
                                 {
                                     <tr>
                                         <td>
-                                            @t.TicketId
+                                            <a asp-controller="Tickets" 
+                                            asp-action="Details"
+                                            asp-route-id="@t.TicketId">
+                                            @t.TicketId</a>
                                             @if (t.IsSimulated)
                                             {
                                                 <span class="badge bg-secondary">dữ liệu mô phỏng</span>

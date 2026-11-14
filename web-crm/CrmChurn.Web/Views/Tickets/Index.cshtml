@@ -1,0 +1,144 @@
+﻿@model TicketListViewModel
+@{
+    ViewData["Title"] = "Ticket";
+    string? khongPhanCong = "none";
+}
+
+<div class="d-flex justify-content-between align-items-center">
+    <h2 class="mb-1">Ticket chăm sóc</h2>
+    <a asp-action="Create" asp-route-customerId="@Model.CustomerId" class="btn btn-primary">Mở ticket</a>
+</div>
+<p class="text-muted small">
+    Dòng có nhãn "dữ liệu mô phỏng" là dữ liệu sinh bằng script để demo, không phải yêu cầu hỗ trợ thật.
+    Ticket mô phỏng chưa có người phụ trách.
+</p>
+
+@if (TempData["ThanhCong"] is string thanhCong)
+{
+    <div class="alert alert-success">@thanhCong</div>
+}
+@if (TempData["ThongBao"] is string thongBao)
+{
+    <div class="alert alert-warning">@thongBao</div>
+}
+
+<form method="get" asp-action="Index" class="row g-2 mb-3">
+    <div class="col-md-2">
+        <input type="text" name="customerId" value="@Model.CustomerId" class="form-control" placeholder="Mã khách" />
+    </div>
+    <div class="col-md-2">
+        <select name="status" class="form-select">
+            <option value="">Mọi trạng thái</option>
+            @foreach (var s in DanhMucTicket.TrangThai)
+            {
+                <option value="@s" selected="@(Model.Status == s)">@s</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select name="priority" class="form-select">
+            <option value="">Mọi mức ưu tiên</option>
+            @foreach (var u in DanhMucTicket.UuTien)
+            {
+                <option value="@u" selected="@(Model.Priority == u)">@u</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select name="staff" class="form-select">
+            <option value="">Mọi người phụ trách</option>
+            <option value="none" selected="@(Model.Staff == "none")">Chưa phân công</option>
+            @foreach (var n in Model.NhanVien)
+            {
+                <option value="@n.StaffId" selected="@(Model.Staff == n.StaffId.ToString())">@n.FullName</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Lọc</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Xóa lọc</a>
+    </div>
+</form>
+
+<p class="mb-2">
+    Tìm thấy <strong>@Model.TongSoDong.ToString("N0")</strong> ticket, trang @Model.Page / @Model.TongTrang.
+</p>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="alert alert-info">Không có ticket.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Khách</th>
+                    <th>Loại</th>
+                    <th>Ưu tiên</th>
+                    <th>Trạng thái</th>
+                    <th>Tạo lúc</th>
+                    <th>Thời gian xử lý</th>
+                    <th>Hài lòng</th>
+                    <th>Phụ trách</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in Model.Items)
+                {
+                    <tr>
+                        <td class="text-nowrap">
+                            @t.TicketId
+                            @if (t.IsSimulated)
+                            {
+                                <span class="badge bg-secondary">dữ liệu mô phỏng</span>
+                            }
+                        </td>
+                        <td class="text-nowrap">
+                            <a asp-controller="Customers" asp-action="Details" asp-route-id="@t.CustomerId">@t.CustomerId</a>
+                        </td>
+                        <td>@t.Category</td>
+                        <td><span class="badge @HienThiTicket.LopUuTien(t.Priority)">@t.Priority</span></td>
+                        <td><span class="badge @HienThiTicket.LopTrangThai(t.Status)">@t.Status</span></td>
+                        <td class="text-nowrap">@HienThi.Ngay(t.CreatedAt)</td>
+                        <td class="text-nowrap">@HienThiTicket.ThoiGianXuLy(t.CreatedAt, t.ClosedAt)</td>
+                        <td>@(t.SatisfactionScore?.ToString() ?? "—")</td>
+                        <td>@(t.AssignedName ?? "Chưa phân công")</td>
+                        <td><a asp-action="Details" asp-route-id="@t.TicketId" class="btn btn-sm btn-outline-primary">Xem</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.TongTrang > 1)
+    {
+        int tu = Math.Max(1, Model.Page - 2);
+        int den = Math.Min(Model.TongTrang, Model.Page + 2);
+        <nav>
+            <ul class="pagination">
+                <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-customerId="@Model.CustomerId"
+                       asp-route-status="@Model.Status" asp-route-priority="@Model.Priority"
+                       asp-route-staff="@Model.Staff" asp-route-page="@(Model.Page - 1)">Trước</a>
+                </li>
+                @for (int p = tu; p <= den; p++)
+                {
+                    <li class="page-item @(p == Model.Page ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-customerId="@Model.CustomerId"
+                           asp-route-status="@Model.Status" asp-route-priority="@Model.Priority"
+                           asp-route-staff="@Model.Staff" asp-route-page="@p">@p</a>
+                    </li>
+                }
+                <li class="page-item @(Model.Page == Model.TongTrang ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-customerId="@Model.CustomerId"
+                       asp-route-status="@Model.Status" asp-route-priority="@Model.Priority"
+                       asp-route-staff="@Model.Staff" asp-route-page="@(Model.Page + 1)">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    }
+}

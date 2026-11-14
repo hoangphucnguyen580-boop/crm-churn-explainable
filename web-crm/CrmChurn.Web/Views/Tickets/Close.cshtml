@@ -1,0 +1,46 @@
+﻿@model TicketCloseModel
+@{
+    var tk = ViewData["Ticket"] as TicketDetailViewModel;
+    string maTicket = ViewData["TicketId"]?.ToString() ?? tk?.TicketId.ToString() ?? "";
+    ViewData["Title"] = "Đóng ticket " + maTicket;
+}
+
+<h2 class="mb-1">Đóng ticket @maTicket</h2>
+@if (tk != null)
+{
+    <p class="text-muted small">
+        Khách @tk.CustomerId, loại @tk.Category, ưu tiên @tk.Priority, tạo lúc @HienThi.Ngay(tk.CreatedAt).
+    </p>
+}
+<p class="text-muted small">
+    Thời điểm đóng do hệ thống gán khi bấm Lưu, không nhập tay. Điểm hài lòng có thể để trống và ghi sau.
+</p>
+
+<form asp-action="Close" asp-route-id="@maTicket" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+    <input type="hidden" asp-for="TrangThaiLucMo" />
+
+    <div class="row g-3">
+        <div class="col-12">
+            <label asp-for="Resolution" class="form-label">Kết quả giải quyết</label>
+            <textarea asp-for="Resolution" class="form-control" rows="4" maxlength="1000"></textarea>
+            <span asp-validation-for="Resolution" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="SatisfactionScore" class="form-label">Điểm hài lòng (1 đến 5)</label>
+            <select asp-for="SatisfactionScore" asp-items="@(new SelectList(new[] { 1, 2, 3, 4, 5 }))" class="form-select">
+                <option value="">-- Chưa ghi --</option>
+            </select>
+            <span asp-validation-for="SatisfactionScore" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-success">Đóng ticket</button>
+        <a asp-action="Details" asp-route-id="@maTicket" class="btn btn-outline-secondary">Hủy</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

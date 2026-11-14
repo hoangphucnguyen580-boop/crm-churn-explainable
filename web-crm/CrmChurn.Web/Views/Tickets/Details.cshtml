@@ -1,0 +1,174 @@
+﻿@model TicketDetailViewModel
+@{
+    ViewData["Title"] = "Ticket " + Model.TicketId;
+    bool dangMo = Model.Status == DanhMucTicket.Open;
+    bool dangXuLy = Model.Status == DanhMucTicket.InProgress;
+    bool daDong = Model.Status == DanhMucTicket.Closed;
+}
+
+@if (TempData["ThanhCong"] is string thanhCong)
+{
+    <div class="alert alert-success">@thanhCong</div>
+}
+@if (TempData["ThongBao"] is string thongBao)
+{
+    <div class="alert alert-warning">@thongBao</div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">
+        Ticket @Model.TicketId
+        <span class="badge @HienThiTicket.LopTrangThai(Model.Status) fs-6">@Model.Status</span>
+        @if (Model.IsSimulated)
+        {
+            <span class="badge bg-secondary fs-6">dữ liệu mô phỏng</span>
+        }
+    </h2>
+    <div class="d-flex gap-2">
+        @if (Model.CoQuyenXoa)
+        {
+            <a asp-action="Delete" asp-route-id="@Model.TicketId" class="btn btn-outline-danger">Xóa</a>
+        }
+        <a asp-action="Index" asp-route-customerId="@Model.CustomerId" class="btn btn-outline-secondary">Về danh sách</a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Thông tin</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Khách</dt>
+                    <dd class="col-sm-7">
+                        <a asp-controller="Customers" asp-action="Details" asp-route-id="@Model.CustomerId">@Model.CustomerId</a>
+                    </dd>
+                    <dt class="col-sm-5">Loại</dt>
+                    <dd class="col-sm-7">@Model.Category</dd>
+                    <dt class="col-sm-5">Ưu tiên</dt>
+                    <dd class="col-sm-7"><span class="badge @HienThiTicket.LopUuTien(Model.Priority)">@Model.Priority</span></dd>
+                    <dt class="col-sm-5">Người phụ trách</dt>
+                    <dd class="col-sm-7">@(Model.AssignedName ?? "Chưa phân công")</dd>
+                    <dt class="col-sm-5">Tạo lúc</dt>
+                    <dd class="col-sm-7">@HienThi.Ngay(Model.CreatedAt)</dd>
+                    <dt class="col-sm-5">Đóng lúc</dt>
+                    <dd class="col-sm-7">@HienThi.Ngay(Model.ClosedAt)</dd>
+                    <dt class="col-sm-5">Thời gian xử lý</dt>
+                    <dd class="col-sm-7">@HienThiTicket.ThoiGianXuLy(Model.CreatedAt, Model.ClosedAt)</dd>
+                    <dt class="col-sm-5">Điểm hài lòng</dt>
+                    <dd class="col-sm-7">@(Model.SatisfactionScore?.ToString() ?? "—")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Giải quyết</div>
+            <div class="card-body">
+                <p class="mb-1"><strong>Kết quả giải quyết:</strong> @(string.IsNullOrEmpty(Model.Resolution) ? "—" : Model.Resolution)</p>
+                @if (!string.IsNullOrEmpty(Model.ReopenReason))
+                {
+                    <p class="mb-1"><strong>Lý do mở lại gần nhất:</strong> @Model.ReopenReason</p>
+                }
+                <p class="text-muted small mt-2 mb-0">
+                    Lịch sử đổi trạng thái của ticket nằm trong nhật ký thao tác (giá trị trước và sau).
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">Thao tác</div>
+            <div class="card-body">
+
+                @if (dangMo || dangXuLy)
+                {
+                    @* Phân công và đổi ưu tiên, KHÔNG đổi trạng thái (UC-04, 7b) *@
+                    <form asp-action="Assign" asp-route-id="@Model.TicketId" method="post" class="row g-2 align-items-end mb-3">
+                        <input type="hidden" name="trangThaiLucMo" value="@Model.Status" />
+                        <div class="col-md-4">
+                            <label class="form-label">Người phụ trách</label>
+                            <select name="staffId" class="form-select">
+                                <option value="">-- Chưa phân công --</option>
+                                @foreach (var n in Model.NhanVien)
+                                {
+                                    <option value="@n.StaffId" selected="@(n.StaffId == Model.AssignedStaffId)">@n.FullName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Mức ưu tiên</label>
+                            <select name="priority" class="form-select">
+                                @foreach (var u in DanhMucTicket.UuTien)
+                                {
+                                    <option value="@u" selected="@(u == Model.Priority)">@u</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-outline-primary">Lưu phân công và ưu tiên</button>
+                        </div>
+                    </form>
+                }
+
+                @if (dangMo)
+                {
+                    @* Open -> InProgress: bắt buộc chọn người phụ trách, chọn sẵn người đã phân công hoặc chính mình *@
+                    <form asp-action="Start" asp-route-id="@Model.TicketId" method="post" class="row g-2 align-items-end mb-3">
+                        <input type="hidden" name="trangThaiLucMo" value="@Model.Status" />
+                        <div class="col-md-4">
+                            <label class="form-label">Người nhận xử lý</label>
+                            <select name="staffId" class="form-select">
+                                @foreach (var n in Model.NhanVien)
+                                {
+                                    <option value="@n.StaffId" selected="@(n.StaffId == (Model.AssignedStaffId ?? Model.NguoiDangNhapId))">@n.FullName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary">Nhận xử lý (chuyển sang InProgress)</button>
+                        </div>
+                    </form>
+                }
+
+                @if (dangXuLy)
+                {
+                    <a asp-action="Close" asp-route-id="@Model.TicketId" class="btn btn-success">Đóng ticket</a>
+                }
+
+                @if (daDong)
+                {
+                    @if (Model.SatisfactionScore == null)
+                    {
+                        <form asp-action="Rate" asp-route-id="@Model.TicketId" method="post" class="row g-2 align-items-end mb-3">
+                            <input type="hidden" name="trangThaiLucMo" value="@Model.Status" />
+                            <div class="col-md-3">
+                                <label class="form-label">Điểm hài lòng của khách</label>
+                                <select name="score" class="form-select">
+                                    @for (int d = 1; d <= 5; d++)
+                                    {
+                                        <option value="@d">@d</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-outline-primary">Ghi điểm hài lòng</button>
+                            </div>
+                        </form>
+                    }
+
+                    @if (Model.CoQuyenMoLai)
+                    {
+                        <a asp-action="Reopen" asp-route-id="@Model.TicketId" class="btn btn-outline-warning">Mở lại ticket</a>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">Ticket đã đóng. Chỉ Manager và Admin mới mở lại được.</p>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
