@@ -1,0 +1,77 @@
+﻿@model AuditLogDetailViewModel
+@{
+    ViewData["Title"] = "Nhật ký " + Model.AuditId;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">
+        Dòng nhật ký @Model.AuditId
+        <span class="badge @NhatKyHienThi.LopHanhDong(Model.Action) fs-6">@NhatKyHienThi.NhanHanhDong(Model.Action)</span>
+    </h2>
+    <a asp-action="Index" class="btn btn-outline-secondary">Về danh sách</a>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Thời điểm</dt>
+            <dd class="col-sm-9">@NhatKyHienThi.NgayGio(Model.OccurredAt)</dd>
+            <dt class="col-sm-3">Người thao tác</dt>
+            <dd class="col-sm-9">@Model.StaffName (@Model.Username)</dd>
+            <dt class="col-sm-3">Bảng</dt>
+            <dd class="col-sm-9">@Model.TableName</dd>
+            <dt class="col-sm-3">Khóa bản ghi</dt>
+            <dd class="col-sm-9">
+                @Model.RecordKey
+                @* Có trang chi tiết thì cho đi tới; dòng Delete thì bản ghi đã mất nên không có liên kết *@
+                @if (Model.Action != "Delete" && Model.TableName == "Customers")
+                {
+                    <a asp-controller="Customers" asp-action="Details" asp-route-id="@Model.RecordKey"
+                       class="btn btn-sm btn-outline-primary ms-2">Mở khách</a>
+                }
+                @if (Model.Action != "Delete" && Model.TableName == "Tickets")
+                {
+                    <a asp-controller="Tickets" asp-action="Details" asp-route-id="@Model.RecordKey"
+                       class="btn btn-sm btn-outline-primary ms-2">Mở ticket</a>
+                }
+            </dd>
+        </dl>
+    </div>
+</div>
+
+@if (Model.KhongDocDuocJson)
+{
+    <div class="alert alert-warning">
+        Giá trị cũ hoặc mới của dòng này không đọc được dạng JSON nên không hiển thị.
+    </div>
+}
+else if (Model.Rows.Count == 0)
+{
+    <div class="alert alert-info">
+        Dòng này không có giá trị đi kèm (ví dụ đăng nhập, đăng xuất).
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr><th>Cột</th><th>Giá trị cũ</th><th>Giá trị mới</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model.Rows)
+                {
+                    <tr>
+                        <td>@r.Cot</td>
+                        <td>@(r.Cu ?? "—")</td>
+                        <td>@(r.Moi ?? "—")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <p class="text-muted small">
+        Dấu "—" nghĩa là bản ghi không có cột này ở phía đó (thêm mới thì không có giá trị cũ, xóa thì không có giá trị mới,
+        sửa thì chỉ ghi các cột đã đổi). "NULL" nghĩa là cột có mặt nhưng giá trị rỗng. Cột <code>PasswordHash</code> luôn hiện <code>***</code>.
+    </p>
+}

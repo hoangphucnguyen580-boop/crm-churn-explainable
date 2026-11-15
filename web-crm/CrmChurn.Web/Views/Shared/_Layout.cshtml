@@ -37,6 +37,13 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Tickets" asp-action="Index">Ticket</a>
                             </li>
+                            @* Chỉ để tiện: quyền thật chặn ở AuditLogsController *@
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="AuditLogs" asp-action="Index">Nhật ký</a>
+                                </li>
+                            }
                         }
                     </ul>
                     @if (User.Identity?.IsAuthenticated == true)

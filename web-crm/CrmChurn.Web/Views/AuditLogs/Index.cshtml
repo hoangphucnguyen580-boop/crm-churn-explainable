@@ -1,0 +1,124 @@
+﻿@model AuditLogListViewModel
+@{
+    ViewData["Title"] = "Nhật ký thao tác";
+    string? tuNgayText = Model.TuNgay?.ToString("yyyy-MM-dd");
+    string? denNgayText = Model.DenNgay?.ToString("yyyy-MM-dd");
+}
+
+<h2 class="mb-1">Nhật ký thao tác</h2>
+<p class="text-muted small">
+    Mọi thao tác thêm, sửa, xóa dữ liệu quan trọng và đăng nhập, đăng xuất đều được hệ thống tự ghi.
+    Mật khẩu không bao giờ hiện ở đây. Script nạp dữ liệu, mô phỏng và chấm điểm theo lô ghi thẳng
+    cơ sở dữ liệu nên không có trong nhật ký này.
+</p>
+
+@if (TempData["ThongBao"] is string thongBao)
+{
+    <div class="alert alert-warning">@thongBao</div>
+}
+@if (!string.IsNullOrEmpty(Model.ThongBaoLoc))
+{
+    <div class="alert alert-warning">@Model.ThongBaoLoc</div>
+}
+
+<form method="get" asp-action="Index" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <select name="staff" class="form-select">
+            <option value="">Mọi người thao tác</option>
+            @foreach (var n in Model.NhanVien)
+            {
+                <option value="@n.StaffId" selected="@(Model.Staff == n.StaffId.ToString())">@n.FullName</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select name="table" class="form-select">
+            <option value="">Mọi bảng</option>
+            @foreach (var b in Model.CacBang)
+            {
+                <option value="@b" selected="@(Model.Table == b)">@b</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <input type="date" name="tuNgay" value="@tuNgayText" class="form-control" title="Từ ngày" />
+    </div>
+    <div class="col-md-2">
+        <input type="date" name="denNgay" value="@denNgayText" class="form-control" title="Đến ngày" />
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Lọc</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Xóa lọc</a>
+    </div>
+</form>
+
+<p class="mb-2">
+    Tìm thấy <strong>@Model.TongSoDong.ToString("N0")</strong> dòng, trang @Model.Page / @Model.TongTrang.
+</p>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="alert alert-info">Không có bản ghi.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Thời điểm</th>
+                    <th>Người thao tác</th>
+                    <th>Hành động</th>
+                    <th>Bảng</th>
+                    <th>Khóa bản ghi</th>
+                    <th>Cột đã đổi</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var d in Model.Items)
+                {
+                    <tr>
+                        <td>@d.AuditId</td>
+                        <td class="text-nowrap">@NhatKyHienThi.NgayGio(d.OccurredAt)</td>
+                        <td class="text-nowrap">@d.StaffName <span class="text-muted small">(@d.Username)</span></td>
+                        <td><span class="badge @NhatKyHienThi.LopHanhDong(d.Action)">@NhatKyHienThi.NhanHanhDong(d.Action)</span></td>
+                        <td>@d.TableName</td>
+                        <td>@d.RecordKey</td>
+                        <td>@(d.CotThayDoi ?? "—")</td>
+                        <td><a asp-action="Details" asp-route-id="@d.AuditId" class="btn btn-sm btn-outline-primary">Xem</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.TongTrang > 1)
+    {
+        int tu = Math.Max(1, Model.Page - 2);
+        int den = Math.Min(Model.TongTrang, Model.Page + 2);
+        <nav>
+            <ul class="pagination">
+                <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-staff="@Model.Staff"
+                       asp-route-table="@Model.Table" asp-route-tuNgay="@tuNgayText"
+                       asp-route-denNgay="@denNgayText" asp-route-page="@(Model.Page - 1)">Trước</a>
+                </li>
+                @for (int p = tu; p <= den; p++)
+                {
+                    <li class="page-item @(p == Model.Page ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-staff="@Model.Staff"
+                           asp-route-table="@Model.Table" asp-route-tuNgay="@tuNgayText"
+                           asp-route-denNgay="@denNgayText" asp-route-page="@p">@p</a>
+                    </li>
+                }
+                <li class="page-item @(Model.Page == Model.TongTrang ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-staff="@Model.Staff"
+                       asp-route-table="@Model.Table" asp-route-tuNgay="@tuNgayText"
+                       asp-route-denNgay="@denNgayText" asp-route-page="@(Model.Page + 1)">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    }
+}
