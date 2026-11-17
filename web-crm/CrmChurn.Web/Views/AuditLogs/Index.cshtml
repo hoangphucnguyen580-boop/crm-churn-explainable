@@ -56,7 +56,11 @@
     Tìm thấy <strong>@Model.TongSoDong.ToString("N0")</strong> dòng, trang @Model.Page / @Model.TongTrang.
 </p>
 
-@if (Model.Items.Count == 0)
+@if (!string.IsNullOrEmpty(Model.ThongBaoLoc))
+{
+    @* Đã có cảnh báo màu vàng ở trên, không hiện thêm khung "Không có bản ghi" *@
+}
+else if (Model.Items.Count == 0)
 {
     <div class="alert alert-info">Không có bản ghi.</div>
 }

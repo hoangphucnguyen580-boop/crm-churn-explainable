@@ -37,6 +37,15 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Tickets" asp-action="Index">Ticket</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Predictions" asp-action="Index">Dự báo</a>
+                            </li>
+                            @if (User.IsInRole("Manager") || User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="RiskConfig" asp-action="Index">Ngưỡng rủi ro</a>
+                                </li>
+                            }
                             @* Chỉ để tiện: quyền thật chặn ở AuditLogsController *@
                             @if (User.IsInRole("Admin"))
                             {

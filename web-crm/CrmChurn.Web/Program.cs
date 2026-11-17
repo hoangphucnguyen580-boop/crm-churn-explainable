@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using CrmChurn.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,16 @@ builder.Services
 
 // Băm mật khẩu bằng PasswordHasher có sẵn của ASP.NET (Y-06)
 builder.Services.AddScoped<IPasswordHasher<Staff>, PasswordHasher<Staff>>();
+// Client gọi dịch vụ dự báo FastAPI. Địa chỉ và thời gian chờ T đọc từ appsettings.json (NFR-10, không hard-code)
+builder.Services.AddHttpClient<PredictionClient>(client =>
+{
+    string baseUrl = builder.Configuration["Prediction:BaseUrl"] ?? "http://127.0.0.1:8000";
+    int timeoutSeconds = builder.Configuration.GetValue<int>("Prediction:TimeoutSeconds", 5);
+    if (timeoutSeconds <= 0) timeoutSeconds = 5;   // giá trị sai thì quay về mặc định 5 giây
+
+    client.BaseAddress = new Uri(baseUrl);
+    client.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
+});
 
 var app = builder.Build();
 

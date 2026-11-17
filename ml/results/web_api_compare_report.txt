@@ -1,0 +1,5 @@
+ĐỐI CHIẾU WEB VÀ FASTAPI (FR-28)
+KHÁC: Số khách khác nhau có dự báo do Web ghi >= 20 -> hiện có 6
+ĐẠT : Gọi API thành công cho mọi khách -> lỗi: 0
+ĐẠT : Xác suất Web đã lưu trùng gọi trực tiếp /predict (chênh lớn nhất 3.52e-09)
+ĐẠT : InputJson do Web gửi trùng đặc trưng đọc từ database theo cách score_batch.py

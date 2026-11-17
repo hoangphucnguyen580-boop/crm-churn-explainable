@@ -1,0 +1,84 @@
+﻿@model PredictionIndexViewModel
+@{
+    ViewData["Title"] = "Dự báo churn";
+}
+
+<h2 class="mb-1">Dự báo churn</h2>
+<p class="text-muted small">
+    Xác suất do mô hình tính trên bộ dữ liệu mẫu IBM Telco, chỉ hỗ trợ nhân viên chăm sóc khách hàng.
+    Đây <strong>không phải nguyên nhân</strong> khiến khách rời bỏ và không dùng để tự động ra quyết định bất lợi cho khách.
+</p>
+
+@if (TempData["ThongBao"] is string thongBao)
+{
+    <div class="alert alert-warning">@thongBao</div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Khách hàng có sẵn</div>
+            <div class="card-body">
+                <p class="small text-muted">
+                    Hệ thống lấy 19 đặc trưng từ hồ sơ, hợp đồng đang hiệu lực và snapshot của khách.
+                    Khách thêm mới qua Web hoặc CSV chưa có snapshot nên phải dùng "Nhập thủ công".
+                </p>
+                <form asp-action="Existing" method="post" class="d-flex gap-2">
+                    <input type="text" name="customerId" class="form-control" maxlength="20" placeholder="Mã khách, ví dụ 7590-VHVEG" />
+                    <button type="submit" class="btn btn-primary text-nowrap">Dự báo</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Nhập thủ công</div>
+            <div class="card-body">
+                <p class="small text-muted">
+                    Nhập tay 19 đặc trưng cho một trường hợp bất kỳ. Kết quả vẫn được lưu để kiểm tra lại (không gắn với khách nào).
+                </p>
+                <a asp-action="Manual" class="btn btn-outline-primary">Mở form nhập thủ công</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h5>10 dự báo gần nhất</h5>
+<p class="text-muted small">Gồm cả các dòng do chấm điểm theo lô (cùng một thời điểm) và các dòng dự báo từ Web.</p>
+@if (Model.GanDay.Count == 0)
+{
+    <div class="alert alert-info">Chưa có dự báo nào.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-sm align-middle">
+            <thead>
+                <tr><th>Mã</th><th>Khách</th><th>Thời điểm</th><th>Xác suất</th><th>Mức rủi ro</th><th>Mô hình</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var d in Model.GanDay)
+                {
+                    <tr>
+                        <td>@d.PredictionId</td>
+                        <td>
+                            @if (d.CustomerId != null)
+                            {
+                                <a asp-controller="Customers" asp-action="Details" asp-route-id="@d.CustomerId">@d.CustomerId</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Nhập thủ công</span>
+                            }
+                        </td>
+                        <td>@HienThi.Ngay(d.PredictionTime)</td>
+                        <td>@d.Probability.ToString("0.0000")</td>
+                        <td><span class="badge @HienThi.LopRuiRo(d.RiskLevel)">@HienThi.NhanRuiRo(d.RiskLevel)</span></td>
+                        <td>@d.ModelVersion</td>
+                        <td><a asp-action="Result" asp-route-id="@d.PredictionId" class="btn btn-sm btn-outline-primary">Xem</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

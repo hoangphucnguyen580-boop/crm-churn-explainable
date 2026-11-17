@@ -109,9 +109,13 @@
                     <p class="mb-1">Mô hình: @db.ModelName (@db.ModelVersion)</p>
                     <p class="mb-1">Thời điểm dự báo: @HienThi.Ngay(db.PredictionTime)</p>
                 }
-                <p class="text-muted small mt-2 mb-0">
+                <p class="text-muted small mt-2 mb-2">
                     Điểm dự báo chỉ hỗ trợ nhân viên chăm sóc, không phải nguyên nhân khiến khách rời bỏ.
                 </p>
+                <form asp-controller="Predictions" asp-action="Existing" method="post">
+                    <input type="hidden" name="customerId" value="@khach.CustomerId" />
+                    <button type="submit" class="btn btn-sm btn-primary">Dự báo churn</button>
+                </form>
             </div>
         </div>
     </div>
