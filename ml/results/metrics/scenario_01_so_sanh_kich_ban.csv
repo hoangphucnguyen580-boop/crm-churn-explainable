@@ -1,0 +1,9 @@
+﻿Tập dữ liệu,Kịch bản,Số khách được chọn,Tỷ lệ khách (%),Điểm thấp nhất trong nhóm,Số khách nhãn churn bắt được (TP),Số khách nhãn No bị chọn (FP),Precision,Recall (coverage),Lift so với chọn ngẫu nhiên,Tỷ lệ Month-to-month trong nhóm (%)
+OOF train (bảng chính),Hiện tại: chỉ nhóm High (điểm >= ngưỡng High),1653,29.3,0.3866,992,661,0.6001,0.6635,2.26,99.8
+OOF train (bảng chính),Hiện tại: Medium + High (điểm >= ngưỡng Medium),2020,35.9,0.3148,1122,898,0.5554,0.7505,2.09,99.1
+OOF train (bảng chính),Top 10% điểm cao nhất,564,10.0,0.6567,430,134,0.7624,0.2876,2.87,100.0
+OOF train (bảng chính),Top 20% điểm cao nhất,1127,20.0,0.5086,758,369,0.6726,0.507,2.53,99.9
+Test (đối chiếu),Hiện tại: chỉ nhóm High (điểm >= ngưỡng High),434,30.8,0.3869,254,180,0.5853,0.6791,2.2,99.1
+Test (đối chiếu),Hiện tại: Medium + High (điểm >= ngưỡng Medium),524,37.2,0.315,283,241,0.5401,0.7567,2.03,98.7
+Test (đối chiếu),Top 10% điểm cao nhất,141,10.0,0.6478,107,34,0.7589,0.2861,2.86,100.0
+Test (đối chiếu),Top 20% điểm cao nhất,282,20.0,0.5021,187,95,0.6631,0.5,2.5,99.6

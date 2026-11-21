@@ -466,4 +466,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import run_log  # log chạy vào ml/results/etl_run_log.txt (Z-12)
+    with run_log.log_run("load_telco.py"):
+        main()

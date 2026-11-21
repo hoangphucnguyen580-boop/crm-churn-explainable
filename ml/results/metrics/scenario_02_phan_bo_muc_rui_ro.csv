@@ -1,0 +1,7 @@
+﻿Tập dữ liệu,Mức rủi ro,Số khách,Tỷ lệ khách (%),Số khách nhãn churn,Tỷ lệ nhãn churn trong mức (%)
+OOF train,Low,3614,64.1,373,10.3
+OOF train,Medium,367,6.5,130,35.4
+OOF train,High,1653,29.3,992,60.0
+Test,Low,885,62.8,91,10.3
+Test,Medium,90,6.4,29,32.2
+Test,High,434,30.8,254,58.5

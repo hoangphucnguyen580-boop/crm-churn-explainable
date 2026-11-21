@@ -1,0 +1,54 @@
+BẢNG KỊCH BẢN CHĂM SÓC (đề tài 18, Mức 1, P4c, yêu cầu Z-11)
+Chỉ minh họa lựa chọn nghiệp vụ. KHÔNG đổi ngưỡng, KHÔNG đổi kết quả test đã khóa.
+Điểm chỉ hỗ trợ chăm sóc khách hàng, không phải quan hệ nhân quả (R-02, R-07).
+
+Mô hình: Gradient Boosting | hiệu chuẩn: False
+Ngưỡng Medium = 0.3148 | ngưỡng High = 0.3866 (đọc từ metadata)
+Tập OOF train: 5634 khách; tập test: 1409 khách
+
+BẢNG 1. SO SÁNH KỊCH BẢN
+           Tập dữ liệu                                        Kịch bản  Số khách được chọn  Tỷ lệ khách (%)  Điểm thấp nhất trong nhóm  Số khách nhãn churn bắt được (TP)  Số khách nhãn No bị chọn (FP)  Precision  Recall (coverage)  Lift so với chọn ngẫu nhiên  Tỷ lệ Month-to-month trong nhóm (%)
+OOF train (bảng chính)   Hiện tại: chỉ nhóm High (điểm >= ngưỡng High)                1653             29.3                     0.3866                                992                            661     0.6001             0.6635                         2.26                                 99.8
+OOF train (bảng chính) Hiện tại: Medium + High (điểm >= ngưỡng Medium)                2020             35.9                     0.3148                               1122                            898     0.5554             0.7505                         2.09                                 99.1
+OOF train (bảng chính)                           Top 10% điểm cao nhất                 564             10.0                     0.6567                                430                            134     0.7624             0.2876                         2.87                                100.0
+OOF train (bảng chính)                           Top 20% điểm cao nhất                1127             20.0                     0.5086                                758                            369     0.6726             0.5070                         2.53                                 99.9
+      Test (đối chiếu)   Hiện tại: chỉ nhóm High (điểm >= ngưỡng High)                 434             30.8                     0.3869                                254                            180     0.5853             0.6791                         2.20                                 99.1
+      Test (đối chiếu) Hiện tại: Medium + High (điểm >= ngưỡng Medium)                 524             37.2                     0.3150                                283                            241     0.5401             0.7567                         2.03                                 98.7
+      Test (đối chiếu)                           Top 10% điểm cao nhất                 141             10.0                     0.6478                                107                             34     0.7589             0.2861                         2.86                                100.0
+      Test (đối chiếu)                           Top 20% điểm cao nhất                 282             20.0                     0.5021                                187                             95     0.6631             0.5000                         2.50                                 99.6
+
+BẢNG 2. PHÂN BỐ MỨC RỦI RO THEO HAI NGƯỠNG HIỆN TẠI
+Tập dữ liệu Mức rủi ro  Số khách  Tỷ lệ khách (%)  Số khách nhãn churn  Tỷ lệ nhãn churn trong mức (%)
+  OOF train        Low      3614             64.1                  373                            10.3
+  OOF train     Medium       367              6.5                  130                            35.4
+  OOF train       High      1653             29.3                  992                            60.0
+       Test        Low       885             62.8                   91                            10.3
+       Test     Medium        90              6.4                   29                            32.2
+       Test       High       434             30.8                  254                            58.5
+
+BẢNG 3. RECALL THEO LOẠI HỢP ĐỒNG (liên quan Z-14)
+Tập dữ liệu                                        Kịch bản       Hợp đồng  Số khách nhãn churn  Số khách bắt được  Recall             Độ tin cậy
+  OOF train   Hiện tại: chỉ nhóm High (điểm >= ngưỡng High) Month-to-month                 1326                992   0.748                 đủ mẫu
+  OOF train   Hiện tại: chỉ nhóm High (điểm >= ngưỡng High)       One year                  130                  0   0.000                 đủ mẫu
+  OOF train   Hiện tại: chỉ nhóm High (điểm >= ngưỡng High)       Two year                   39                  0   0.000                 đủ mẫu
+  OOF train Hiện tại: Medium + High (điểm >= ngưỡng Medium) Month-to-month                 1326               1118   0.843                 đủ mẫu
+  OOF train Hiện tại: Medium + High (điểm >= ngưỡng Medium)       One year                  130                  4   0.031                 đủ mẫu
+  OOF train Hiện tại: Medium + High (điểm >= ngưỡng Medium)       Two year                   39                  0   0.000                 đủ mẫu
+  OOF train                           Top 10% điểm cao nhất Month-to-month                 1326                430   0.324                 đủ mẫu
+  OOF train                           Top 10% điểm cao nhất       One year                  130                  0   0.000                 đủ mẫu
+  OOF train                           Top 10% điểm cao nhất       Two year                   39                  0   0.000                 đủ mẫu
+  OOF train                           Top 20% điểm cao nhất Month-to-month                 1326                758   0.572                 đủ mẫu
+  OOF train                           Top 20% điểm cao nhất       One year                  130                  0   0.000                 đủ mẫu
+  OOF train                           Top 20% điểm cao nhất       Two year                   39                  0   0.000                 đủ mẫu
+       Test   Hiện tại: chỉ nhóm High (điểm >= ngưỡng High) Month-to-month                  329                252   0.766                 đủ mẫu
+       Test   Hiện tại: chỉ nhóm High (điểm >= ngưỡng High)       One year                   36                  2   0.056                 đủ mẫu
+       Test   Hiện tại: chỉ nhóm High (điểm >= ngưỡng High)       Two year                    9                  0   0.000 ÍT MẪU, không kết luận
+       Test Hiện tại: Medium + High (điểm >= ngưỡng Medium) Month-to-month                  329                281   0.854                 đủ mẫu
+       Test Hiện tại: Medium + High (điểm >= ngưỡng Medium)       One year                   36                  2   0.056                 đủ mẫu
+       Test Hiện tại: Medium + High (điểm >= ngưỡng Medium)       Two year                    9                  0   0.000 ÍT MẪU, không kết luận
+       Test                           Top 10% điểm cao nhất Month-to-month                  329                107   0.325                 đủ mẫu
+       Test                           Top 10% điểm cao nhất       One year                   36                  0   0.000                 đủ mẫu
+       Test                           Top 10% điểm cao nhất       Two year                    9                  0   0.000 ÍT MẪU, không kết luận
+       Test                           Top 20% điểm cao nhất Month-to-month                  329                186   0.565                 đủ mẫu
+       Test                           Top 20% điểm cao nhất       One year                   36                  1   0.028                 đủ mẫu
+       Test                           Top 20% điểm cao nhất       Two year                    9                  0   0.000 ÍT MẪU, không kết luận

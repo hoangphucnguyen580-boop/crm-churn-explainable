@@ -1,0 +1,35 @@
+
+==============================================================================
+BẮT ĐẦU : 20/11/2026 13:31:50
+Script   : load_telco.py
+Tham số  : (không có)
+Python   : 3.14.6 | Windows-10-10.0.19044-SP0
+------------------------------------------------------------------------------
+File CSV     : E:\Luu_Bai\Thực Tập Chuyên Ngành HK_4\Bài Tập\crm-churn-explainable\ml\data\raw\Telco-Customer-Churn.csv
+SnapshotDate : 2026-09-30 (ngày cố định, EstimatedJoinDate là ngày ước lượng)
+Bước 1: CSV hợp lệ, 7043 dòng
+Bước 2: đã chuẩn bị 7043 khách, 7043 snapshot và 7043 dòng hợp đồng nghiệp vụ
+DỪNG, chưa ghi gì:
+Bảng TelcoRaw đã có 7043 dòng. Script không xóa gì. Muốn nạp lại: xóa database, chạy lại các file SQL rồi chạy script này.
+------------------------------------------------------------------------------
+KẾT THÚC : 20/11/2026 13:31:57 (6.4 giây)
+Kết quả tự nhận diện: CÓ DẤU HIỆU BẤT THƯỜNG (DỪNG), xem các dòng phía trên
+
+==============================================================================
+BẮT ĐẦU : 20/11/2026 13:32:36
+Script   : register_model.py
+Tham số  : (không có)
+Python   : 3.14.6 | Windows-10-10.0.19044-SP0
+------------------------------------------------------------------------------
+File metadata : E:\Luu_Bai\Thực Tập Chuyên Ngành HK_4\Bài Tập\crm-churn-explainable\ml\models\churn_model_meta_v1.json
+Chế độ        : GHI THẬT vào database
+Bước 1: metadata hợp lệ. SHA-256 của CSV khớp với metadata.
+        mô hình   : Gradient Boosting v1
+        Threshold : 0.3148 (ngưỡng Medium, D-13)
+        RiskMediumThreshold = 0.3148 | RiskHighThreshold = 0.3866
+        Seed      : 42 | thư viện: python=3.14.6;scikit-learn=1.9.0;pandas=3.0.3;numpy=2.5.0;joblib=1.5.3
+DỪNG, chưa ghi gì:
+ModelVersions đã có 1 dòng với Version = 'v1'. Script không xóa và không ghi đè gì.
+------------------------------------------------------------------------------
+KẾT THÚC : 20/11/2026 13:32:38 (2.1 giây)
+Kết quả tự nhận diện: CÓ DẤU HIỆU BẤT THƯỜNG (DỪNG), xem các dòng phía trên

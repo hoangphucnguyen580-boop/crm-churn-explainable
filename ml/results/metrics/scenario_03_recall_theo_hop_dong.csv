@@ -1,0 +1,25 @@
+﻿Tập dữ liệu,Kịch bản,Hợp đồng,Số khách nhãn churn,Số khách bắt được,Recall,Độ tin cậy
+OOF train,Hiện tại: chỉ nhóm High (điểm >= ngưỡng High),Month-to-month,1326,992,0.748,đủ mẫu
+OOF train,Hiện tại: chỉ nhóm High (điểm >= ngưỡng High),One year,130,0,0.0,đủ mẫu
+OOF train,Hiện tại: chỉ nhóm High (điểm >= ngưỡng High),Two year,39,0,0.0,đủ mẫu
+OOF train,Hiện tại: Medium + High (điểm >= ngưỡng Medium),Month-to-month,1326,1118,0.843,đủ mẫu
+OOF train,Hiện tại: Medium + High (điểm >= ngưỡng Medium),One year,130,4,0.031,đủ mẫu
+OOF train,Hiện tại: Medium + High (điểm >= ngưỡng Medium),Two year,39,0,0.0,đủ mẫu
+OOF train,Top 10% điểm cao nhất,Month-to-month,1326,430,0.324,đủ mẫu
+OOF train,Top 10% điểm cao nhất,One year,130,0,0.0,đủ mẫu
+OOF train,Top 10% điểm cao nhất,Two year,39,0,0.0,đủ mẫu
+OOF train,Top 20% điểm cao nhất,Month-to-month,1326,758,0.572,đủ mẫu
+OOF train,Top 20% điểm cao nhất,One year,130,0,0.0,đủ mẫu
+OOF train,Top 20% điểm cao nhất,Two year,39,0,0.0,đủ mẫu
+Test,Hiện tại: chỉ nhóm High (điểm >= ngưỡng High),Month-to-month,329,252,0.766,đủ mẫu
+Test,Hiện tại: chỉ nhóm High (điểm >= ngưỡng High),One year,36,2,0.056,đủ mẫu
+Test,Hiện tại: chỉ nhóm High (điểm >= ngưỡng High),Two year,9,0,0.0,"ÍT MẪU, không kết luận"
+Test,Hiện tại: Medium + High (điểm >= ngưỡng Medium),Month-to-month,329,281,0.854,đủ mẫu
+Test,Hiện tại: Medium + High (điểm >= ngưỡng Medium),One year,36,2,0.056,đủ mẫu
+Test,Hiện tại: Medium + High (điểm >= ngưỡng Medium),Two year,9,0,0.0,"ÍT MẪU, không kết luận"
+Test,Top 10% điểm cao nhất,Month-to-month,329,107,0.325,đủ mẫu
+Test,Top 10% điểm cao nhất,One year,36,0,0.0,đủ mẫu
+Test,Top 10% điểm cao nhất,Two year,9,0,0.0,"ÍT MẪU, không kết luận"
+Test,Top 20% điểm cao nhất,Month-to-month,329,186,0.565,đủ mẫu
+Test,Top 20% điểm cao nhất,One year,36,1,0.028,đủ mẫu
+Test,Top 20% điểm cao nhất,Two year,9,0,0.0,"ÍT MẪU, không kết luận"
